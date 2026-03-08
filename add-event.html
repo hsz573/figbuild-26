@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Night Garden — Add Event</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:#0A0408; --sun:#F8C769; --tangerine:#F67840;
+  --peony:#CD7097; --terra:#A95E5C; --almond:#CEA89A; --plum:#5F4045;
+}
+html, body {
+  width:100%; min-height:100vh; background:#060304;
+  display:flex; justify-content:center; font-family:'DM Sans',sans-serif;
+}
+.phone {
+  width:390px; height:844px; background:var(--black);
+  position:relative; overflow:hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  transform:translateY(16px);
+}
+.screen.active { opacity:1; pointer-events:all; transform:translateY(0); }
+
+/* ── SHARED TOP BAR ── */
+.top-bar {
+  display:flex; align-items:center; padding:52px 24px 0;
+  position:relative; z-index:10; flex-shrink:0;
+}
+.back-btn {
+  display:flex; align-items:center; gap:6px; cursor:pointer;
+  font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase;
+  color:rgba(206,168,154,0.45); background:none; border:none; padding:0;
+}
+.back-btn svg { opacity:0.5; }
+.top-bar-title {
+  flex:1; text-align:center;
+  font-size:10px; font-weight:400; letter-spacing:0.18em; text-transform:uppercase;
+  color:rgba(206,168,154,0.35);
+}
+.top-bar-action {
+  font-size:11px; font-weight:400; letter-spacing:0.1em; text-transform:uppercase;
+  color:rgba(248,199,105,0.5); cursor:pointer; background:none; border:none;
+}
+
+/* ─────────────────────────────────────────────
+   SCREEN 1: CHOOSE
+───────────────────────────────────────────── */
+.choose-bg {
+  flex:1; position:relative; overflow:hidden;
+}
+/* faint garden silhouette behind the sheet */
+.garden-bg-hint {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(10,4,8,0.3) 0%, rgba(10,4,8,0.85) 100%);
+  display:flex; align-items:flex-end; justify-content:center; padding-bottom:0;
+}
+.bg-plant-hint {
+  opacity:0.18; margin-bottom:-10px;
+}
+
+.choose-sheet {
+  flex-shrink:0;
+  background:rgba(12,5,9,0.97);
+  border-top:1px solid rgba(95,64,69,0.25);
+  border-radius:24px 24px 0 0;
+  padding:0 24px 40px;
+  position:relative; z-index:5;
+}
+.sheet-handle {
+  width:36px; height:3px; background:rgba(95,64,69,0.4);
+  border-radius:2px; margin:12px auto 20px;
+}
+.choose-title {
+  font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300;
+  font-style:italic; color:rgba(206,168,154,0.9); margin-bottom:4px;
+}
+.choose-sub {
+  font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:300;
+  font-style:italic; color:rgba(206,168,154,0.35); margin-bottom:22px;
+}
+.choose-options { display:flex; flex-direction:column; gap:12px; }
+.choose-card {
+  display:flex; align-items:center; gap:16px; padding:18px 20px;
+  background:rgba(95,64,69,0.1); border:1px solid rgba(95,64,69,0.25);
+  border-radius:16px; cursor:pointer;
+  transition:background 0.2s, border-color 0.2s;
+}
+.choose-card:hover, .choose-card:active { background:rgba(95,64,69,0.18); }
+.choose-card.suggested { border-color:rgba(248,199,105,0.2); background:rgba(248,199,105,0.05); }
+.choose-card.suggested:hover { background:rgba(248,199,105,0.09); }
+.card-icon {
+  width:42px; height:42px; border-radius:12px; display:flex; align-items:center;
+  justify-content:center; flex-shrink:0;
+  background:rgba(95,64,69,0.25); border:1px solid rgba(95,64,69,0.3);
+}
+.choose-card.suggested .card-icon { background:rgba(248,199,105,0.08); border-color:rgba(248,199,105,0.2); }
+.card-text { flex:1; }
+.card-title {
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
+  color:rgba(206,168,154,0.85); letter-spacing:0.01em; margin-bottom:2px;
+}
+.card-desc {
+  font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic;
+  font-weight:300; color:rgba(206,168,154,0.4);
+}
+.card-arrow { color:rgba(206,168,154,0.25); font-size:18px; }
+.cancel-row {
+  text-align:center; margin-top:20px;
+  font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+  color:rgba(206,168,154,0.25); cursor:pointer;
+}
+
+/* ─────────────────────────────────────────────
+   SCREEN 2a: MANUAL ENTRY
+───────────────────────────────────────────── */
+.manual-body {
+  flex:1; overflow-y:auto; overflow-x:hidden;
+  padding:20px 24px 24px; scrollbar-width:none;
+}
+.manual-body::-webkit-scrollbar { display:none; }
+
+.section-label {
+  font-size:9px; font-weight:400; letter-spacing:0.18em; text-transform:uppercase;
+  color:rgba(206,168,154,0.3); margin-bottom:8px;
+}
+
+/* event name input */
+.event-name-input {
+  width:100%; background:none; border:none; border-bottom:1px solid rgba(95,64,69,0.35);
+  padding:8px 0 10px; outline:none;
+  font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300;
+  color:rgba(206,168,154,0.9); letter-spacing:0.01em;
+  margin-bottom:24px;
+}
+.event-name-input::placeholder { color:rgba(206,168,154,0.25); font-style:italic; }
+
+/* type pills */
+.type-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px;
+}
+.type-pill {
+  padding:10px 12px; border-radius:12px; cursor:pointer;
+  border:1px solid rgba(95,64,69,0.25); background:rgba(95,64,69,0.08);
+  transition:all 0.2s;
+}
+.type-pill.active {
+  border-color:rgba(248,199,105,0.35); background:rgba(248,199,105,0.08);
+}
+.type-pill-icon { font-size:16px; margin-bottom:3px; }
+.type-pill-name {
+  font-size:12px; font-weight:500; color:rgba(206,168,154,0.75); letter-spacing:0.04em;
+  display:block; margin-bottom:1px;
+}
+.type-pill.active .type-pill-name { color:rgba(248,199,105,0.85); }
+.type-pill-why {
+  font-family:'Cormorant Garamond',serif; font-size:11px; font-style:italic;
+  color:rgba(206,168,154,0.3); line-height:1.3; display:block;
+}
+.type-pill.active .type-pill-why { color:rgba(248,199,105,0.4); }
+
+/* date strip */
+.date-strip {
+  display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;
+  margin-bottom:24px; scrollbar-width:none;
+}
+.date-strip::-webkit-scrollbar { display:none; }
+.date-chip {
+  flex-shrink:0; padding:8px 14px; border-radius:20px; cursor:pointer;
+  border:1px solid rgba(95,64,69,0.2); background:transparent;
+  font-size:11px; font-weight:300; color:rgba(206,168,154,0.45); letter-spacing:0.04em;
+  transition:all 0.2s; white-space:nowrap;
+}
+.date-chip.active {
+  border-color:rgba(248,199,105,0.35); background:rgba(248,199,105,0.08);
+  color:rgba(248,199,105,0.75);
+}
+
+/* time row */
+.time-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 0; border-bottom:1px solid rgba(95,64,69,0.2); margin-bottom:24px;
+}
+.time-display {
+  font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300;
+  color:rgba(206,168,154,0.8); letter-spacing:0.02em;
+}
+.time-hint { font-size:10px; color:rgba(206,168,154,0.3); letter-spacing:0.06em; }
+
+/* people row */
+.people-row {
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; align-items:center;
+}
+.person-chip {
+  padding:5px 12px; border-radius:20px;
+  background:rgba(205,112,151,0.1); border:1px solid rgba(205,112,151,0.25);
+  font-size:12px; font-weight:400; color:rgba(205,112,151,0.75); letter-spacing:0.04em;
+}
+.add-chip {
+  padding:5px 12px; border-radius:20px;
+  background:transparent; border:1px dashed rgba(95,64,69,0.35);
+  font-size:11px; font-weight:300; color:rgba(206,168,154,0.3);
+  letter-spacing:0.06em; cursor:pointer;
+}
+
+/* place input */
+.place-input {
+  width:100%; background:none; border:none; border-bottom:1px solid rgba(95,64,69,0.2);
+  padding:8px 0 10px; outline:none; margin-bottom:28px;
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:300;
+  color:rgba(206,168,154,0.75); letter-spacing:0.01em;
+}
+.place-input::placeholder { color:rgba(206,168,154,0.25); }
+
+/* density preview */
+.density-preview {
+  display:flex; align-items:center; gap:16px;
+  padding:16px 18px; border-radius:16px;
+  background:rgba(95,64,69,0.08); border:1px solid rgba(95,64,69,0.2);
+  margin-bottom:24px; transition:border-color 0.4s, background 0.4s;
+}
+.density-preview.vivid {
+  border-color:rgba(248,199,105,0.22); background:rgba(248,199,105,0.05);
+}
+.density-preview.luminous {
+  border-color:rgba(248,199,105,0.3); background:rgba(248,199,105,0.07);
+}
+.preview-plant { flex-shrink:0; width:48px; height:60px; position:relative; }
+.preview-plant svg { overflow:visible; }
+.preview-text { flex:1; }
+.preview-eyebrow {
+  font-size:8px; letter-spacing:0.15em; text-transform:uppercase;
+  color:rgba(206,168,154,0.3); margin-bottom:2px;
+}
+.preview-density-label {
+  font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300;
+  font-style:italic; color:rgba(206,168,154,0.7); margin-bottom:2px;
+  transition:color 0.4s;
+}
+.density-preview.vivid .preview-density-label   { color:rgba(248,199,105,0.8); text-shadow:0 0 12px rgba(248,199,105,0.25); }
+.density-preview.luminous .preview-density-label{ color:rgba(255,240,180,0.95); text-shadow:0 0 18px rgba(248,199,105,0.4); }
+.preview-drivers {
+  font-family:'Cormorant Garamond',serif; font-size:11px; font-style:italic;
+  color:rgba(206,168,154,0.35); transition:color 0.4s;
+}
+.density-preview.vivid .preview-drivers    { color:rgba(248,199,105,0.4); }
+.density-preview.luminous .preview-drivers { color:rgba(248,199,105,0.5); }
+
+/* plant button */
+.plant-btn {
+  width:100%; padding:15px 0; border-radius:14px; border:none; cursor:pointer;
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:400;
+  letter-spacing:0.14em; text-transform:uppercase;
+  background:rgba(248,199,105,0.12); border:1px solid rgba(248,199,105,0.25);
+  color:rgba(248,199,105,0.75); text-shadow:0 0 14px rgba(248,199,105,0.2);
+  transition:all 0.2s;
+}
+.plant-btn:hover { background:rgba(248,199,105,0.18); }
+
+/* ─────────────────────────────────────────────
+   SCREEN 2b: SUGGESTIONS
+───────────────────────────────────────────── */
+.suggest-header { padding:0 24px 16px; flex-shrink:0; }
+.suggest-title {
+  font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300;
+  font-style:italic; color:rgba(206,168,154,0.88); margin-bottom:3px;
+}
+.suggest-sub {
+  font-family:'Cormorant Garamond',serif; font-size:13px; font-weight:300;
+  font-style:italic; color:rgba(206,168,154,0.35);
+}
+.suggest-scroll {
+  flex:1; overflow-y:auto; padding:0 24px 24px; scrollbar-width:none;
+}
+.suggest-scroll::-webkit-scrollbar { display:none; }
+
+.sug-card {
+  border:1px solid rgba(95,64,69,0.25); border-radius:18px;
+  padding:18px 18px 16px; margin-bottom:14px; position:relative; overflow:hidden;
+  background:rgba(12,5,9,0.6);
+}
+.sug-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(to right, transparent, rgba(95,64,69,0.4), transparent);
+}
+.sug-card.density-vivid { border-color:rgba(248,199,105,0.2); }
+.sug-card.density-vivid::before { background:linear-gradient(to right,transparent,rgba(248,199,105,0.25),transparent); }
+.sug-card.density-luminous { border-color:rgba(248,199,105,0.3); }
+.sug-card.density-luminous::before { background:linear-gradient(to right,transparent,rgba(248,199,105,0.4),transparent); }
+
+.sug-card-top {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:10px; gap:10px;
+}
+.sug-day-badge {
+  font-size:9px; letter-spacing:0.12em; text-transform:uppercase;
+  color:rgba(206,168,154,0.35); margin-bottom:5px;
+}
+.sug-event-title {
+  font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300;
+  color:rgba(206,168,154,0.88); line-height:1.25; flex:1;
+}
+.sug-density-badge {
+  flex-shrink:0; font-family:'Cormorant Garamond',serif; font-size:11px;
+  font-style:italic; padding:3px 10px; border-radius:12px; margin-top:2px;
+  background:rgba(95,64,69,0.15); border:1px solid rgba(95,64,69,0.3);
+  color:rgba(206,168,154,0.45);
+}
+.sug-density-badge.vivid {
+  background:rgba(248,199,105,0.08); border-color:rgba(248,199,105,0.25);
+  color:rgba(248,199,105,0.65); text-shadow:0 0 8px rgba(248,199,105,0.2);
+}
+.sug-density-badge.luminous {
+  background:rgba(248,199,105,0.12); border-color:rgba(248,199,105,0.35);
+  color:rgba(255,240,160,0.85); text-shadow:0 0 12px rgba(248,199,105,0.35);
+}
+
+.sug-divider {
+  height:1px; background:rgba(95,64,69,0.18); margin:10px 0;
+}
+
+.sug-why-label {
+  font-size:8px; letter-spacing:0.16em; text-transform:uppercase;
+  color:rgba(206,168,154,0.25); margin-bottom:5px;
+}
+.sug-why-text {
+  font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:300;
+  font-style:italic; color:rgba(206,168,154,0.6); line-height:1.55;
+  margin-bottom:10px;
+}
+
+.sug-tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; }
+.sug-tag {
+  font-size:8px; letter-spacing:0.08em; padding:2px 8px; border-radius:10px;
+  color:rgba(206,168,154,0.35); background:rgba(95,64,69,0.12);
+  border:1px solid rgba(95,64,69,0.2);
+}
+
+.sug-actions { display:flex; gap:8px; }
+.btn-add-this {
+  flex:1; padding:10px 0; border-radius:10px; text-align:center; cursor:pointer;
+  font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase;
+  background:rgba(248,199,105,0.09); border:1px solid rgba(248,199,105,0.22);
+  color:rgba(248,199,105,0.65);
+}
+.btn-day-pick {
+  padding:10px 14px; border-radius:10px; cursor:pointer;
+  font-size:11px; font-weight:300; letter-spacing:0.08em;
+  background:rgba(95,64,69,0.12); border:1px solid rgba(95,64,69,0.25);
+  color:rgba(206,168,154,0.4);
+}
+
+.manual-link {
+  text-align:center; padding:4px 0 8px;
+  font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic;
+  color:rgba(206,168,154,0.3); cursor:pointer;
+}
+
+/* ─────────────────────────────────────────────
+   SCREEN 3: CONFIRMATION
+───────────────────────────────────────────── */
+.confirm-body {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:0 32px; text-align:center;
+}
+.confirm-planted {
+  font-size:9px; letter-spacing:0.22em; text-transform:uppercase;
+  color:rgba(248,199,105,0.5); margin-bottom:20px;
+}
+.confirm-plant-wrap {
+  width:120px; height:140px; position:relative; margin-bottom:28px;
+}
+.confirm-plant-wrap svg { overflow:visible; }
+@keyframes confirmSway { 0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)} }
+@keyframes confirmGlow { 0%,100%{opacity:0.8}50%{opacity:1} }
+.confirm-sway { animation:confirmSway 5s ease-in-out infinite; transform-origin:60px 140px; }
+.confirm-glow { animation:confirmGlow 2.5s ease-in-out infinite; }
+.confirm-event-date {
+  font-size:10px; letter-spacing:0.14em; text-transform:uppercase;
+  color:rgba(206,168,154,0.35); margin-bottom:8px;
+}
+.confirm-event-name {
+  font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300;
+  color:rgba(206,168,154,0.9); line-height:1.25; margin-bottom:10px;
+}
+.confirm-density {
+  font-family:'Cormorant Garamond',serif; font-size:14px; font-style:italic;
+  color:rgba(248,199,105,0.65); text-shadow:0 0 12px rgba(248,199,105,0.3);
+  margin-bottom:6px;
+}
+.confirm-science {
+  font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic;
+  color:rgba(206,168,154,0.35); line-height:1.5; max-width:280px; margin-bottom:36px;
+}
+
+.confirm-actions { display:flex; flex-direction:column; gap:10px; width:100%; }
+.btn-view-garden {
+  padding:14px 0; border-radius:14px; text-align:center; text-decoration:none;
+  display:block; cursor:pointer;
+  font-size:12px; letter-spacing:0.14em; text-transform:uppercase;
+  background:rgba(248,199,105,0.1); border:1px solid rgba(248,199,105,0.25);
+  color:rgba(248,199,105,0.7); text-shadow:0 0 12px rgba(248,199,105,0.2);
+}
+.btn-add-another {
+  padding:12px 0; border-radius:14px; text-align:center; cursor:pointer;
+  font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+  background:transparent; border:1px solid rgba(95,64,69,0.25);
+  color:rgba(206,168,154,0.35);
+}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ══════════════════════════════════════
+       SCREEN 1: CHOOSE PATH
+  ══════════════════════════════════════ -->
+  <div class="screen active" id="s-choose">
+
+    <!-- blurred garden hint behind sheet -->
+    <div class="choose-bg">
+      <div class="garden-bg-hint">
+        <!-- faint plant silhouette -->
+        <svg class="bg-plant-hint" width="90" height="130" viewBox="0 0 90 130" overflow="visible">
+          <path d="M45 128 C44 108 42 88 45 70" stroke="rgba(169,94,92,0.8)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M45 100 C38 92 25 88 22 80 C30 85 43 92 45 100Z" fill="rgba(169,94,92,0.5)"/>
+          <path d="M45 88 C52 80 65 76 68 68 C60 73 47 80 45 88Z" fill="rgba(169,94,92,0.4)"/>
+          <g opacity="0.55">
+            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.35)" transform="rotate(0 45 70)"/>
+            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.3)" transform="rotate(60 45 70)"/>
+            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.35)" transform="rotate(120 45 70)"/>
+            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.3)" transform="rotate(180 45 70)"/>
+            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.35)" transform="rotate(240 45 70)"/>
+            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.3)" transform="rotate(300 45 70)"/>
+          </g>
+          <circle cx="45" cy="70" r="10" fill="rgba(248,199,105,0.5)"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- sheet -->
+    <div class="choose-sheet">
+      <div class="sheet-handle"></div>
+      <div class="choose-title">add to your garden</div>
+      <div class="choose-sub">what kind of moment are you planting?</div>
+      <div class="choose-options">
+
+        <div class="choose-card suggested" onclick="show('s-suggest')">
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="3" fill="rgba(248,199,105,0.8)"/>
+              <circle cx="10" cy="10" r="6" fill="none" stroke="rgba(248,199,105,0.4)" stroke-width="0.8"/>
+              <line x1="10" y1="2" x2="10" y2="4" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="10" y1="16" x2="10" y2="18" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="2" y1="10" x2="4" y2="10" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="16" y1="10" x2="18" y2="10" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="4.2" y1="4.2" x2="5.6" y2="5.6" stroke="rgba(248,199,105,0.4)" stroke-width="1" stroke-linecap="round"/>
+              <line x1="14.4" y1="14.4" x2="15.8" y2="15.8" stroke="rgba(248,199,105,0.4)" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="card-text">
+            <div class="card-title">Find something memorable</div>
+            <div class="card-desc">ideas chosen for memory richness</div>
+          </div>
+          <div class="card-arrow">›</div>
+        </div>
+
+        <div class="choose-card" onclick="show('s-manual')">
+          <div class="card-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M3 13.5L3.5 10.5L12 2L16 6L7.5 14.5L4.5 15Z" stroke="rgba(206,168,154,0.6)" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+              <path d="M11 3.5L14.5 7" stroke="rgba(206,168,154,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="card-text">
+            <div class="card-title">Create an event</div>
+            <div class="card-desc">manually plan a moment</div>
+          </div>
+          <div class="card-arrow">›</div>
+        </div>
+
+      </div>
+      <div class="cancel-row" onclick="window.history.back()">cancel</div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2a: MANUAL ENTRY
+  ══════════════════════════════════════ -->
+  <div class="screen" id="s-manual">
+    <div class="top-bar">
+      <button class="back-btn" onclick="show('s-choose')">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="rgba(206,168,154,0.5)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        back
+      </button>
+      <div class="top-bar-title">plant a moment</div>
+      <div class="top-bar-action" style="opacity:0">save</div>
+    </div>
+
+    <div class="manual-body">
+
+      <!-- Event name -->
+      <div class="section-label">name this moment</div>
+      <input class="event-name-input" id="event-name" type="text"
+        placeholder="give it a name..." value="Dinner at new spot with Jamie"
+        oninput="updatePreview()">
+
+      <!-- Type -->
+      <div class="section-label">what kind of day?</div>
+      <div class="type-grid">
+        <div class="type-pill active" data-type="social" onclick="selectType(this)">
+          <div class="type-pill-icon">✦</div>
+          <span class="type-pill-name">Social</span>
+          <span class="type-pill-why">connection deepens memory</span>
+        </div>
+        <div class="type-pill" data-type="explore" onclick="selectType(this)">
+          <div class="type-pill-icon">◎</div>
+          <span class="type-pill-name">Explore</span>
+          <span class="type-pill-why">novelty creates vivid traces</span>
+        </div>
+        <div class="type-pill" data-type="focus" onclick="selectType(this)">
+          <div class="type-pill-icon">◇</div>
+          <span class="type-pill-name">Focus</span>
+          <span class="type-pill-why">attention creates depth</span>
+        </div>
+        <div class="type-pill" data-type="rest" onclick="selectType(this)">
+          <div class="type-pill-icon">○</div>
+          <span class="type-pill-name">Rest</span>
+          <span class="type-pill-why">renewal, quieter memory</span>
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="section-label">when?</div>
+      <div class="date-strip">
+        <div class="date-chip" data-date="Mar 8" onclick="selectDate(this)">Sun · Mar 8</div>
+        <div class="date-chip active" data-date="Mar 9" onclick="selectDate(this)">Mon · Mar 9</div>
+        <div class="date-chip" data-date="Mar 10" onclick="selectDate(this)">Tue · Mar 10</div>
+        <div class="date-chip" data-date="Mar 11" onclick="selectDate(this)">Wed · Mar 11</div>
+        <div class="date-chip" data-date="Mar 12" onclick="selectDate(this)">Thu · Mar 12</div>
+        <div class="date-chip" data-date="Mar 13" onclick="selectDate(this)">Fri · Mar 13</div>
+      </div>
+
+      <!-- Time -->
+      <div class="section-label">time</div>
+      <div class="time-row">
+        <div class="time-display" id="time-display">7:00 PM</div>
+        <div class="time-hint">tap to change</div>
+      </div>
+
+      <!-- People -->
+      <div class="section-label">with who?</div>
+      <div class="people-row" id="people-row">
+        <div class="person-chip" data-person="Jamie">Jamie</div>
+        <div class="add-chip" onclick="addPerson()">+ add someone</div>
+      </div>
+
+      <!-- Place -->
+      <div class="section-label">where?</div>
+      <input class="place-input" id="place-input" type="text"
+        placeholder="a place (new = more memorable)"
+        value="Neighborhood Spot"
+        oninput="updatePreview()">
+
+      <!-- Density preview -->
+      <div class="density-preview vivid" id="density-preview">
+        <div class="preview-plant">
+          <svg width="48" height="60" viewBox="0 0 48 60" overflow="visible" id="preview-svg">
+            <defs>
+              <radialGradient id="ppg" cx="50%" cy="90%" r="60%" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="#F8C769" stop-opacity="0.9"/>
+                <stop offset="50%" stop-color="#F67840" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#CD7097" stop-opacity="0.15"/>
+              </radialGradient>
+              <filter id="ppf" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="4" result="b1"/>
+                <feGaussianBlur stdDeviation="9" result="b2"/>
+                <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path d="M24 58 C23 48 22 38 24 30" stroke="rgba(169,94,92,0.5)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <g filter="url(#ppf)" id="preview-petals">
+              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" transform="rotate(0 24 30)"/>
+              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" opacity="0.9" transform="rotate(60 24 30)"/>
+              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" transform="rotate(120 24 30)"/>
+              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" opacity="0.9" transform="rotate(180 24 30)"/>
+              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" transform="rotate(240 24 30)"/>
+              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" opacity="0.9" transform="rotate(300 24 30)"/>
+            </g>
+            <circle cx="24" cy="30" r="7" fill="#F8C769" opacity="0.9"/>
+            <circle cx="24" cy="30" r="3.5" fill="rgba(255,255,255,0.7)"/>
+          </svg>
+        </div>
+        <div class="preview-text">
+          <div class="preview-eyebrow">this could be</div>
+          <div class="preview-density-label" id="preview-label">vivid</div>
+          <div class="preview-drivers" id="preview-drivers">novelty + social connection</div>
+        </div>
+      </div>
+
+      <button class="plant-btn" onclick="confirmEvent()">plant this event ✦</button>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2b: SUGGESTIONS
+  ══════════════════════════════════════ -->
+  <div class="screen" id="s-suggest">
+    <div class="top-bar" style="padding-bottom:0;">
+      <button class="back-btn" onclick="show('s-choose')">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="rgba(206,168,154,0.5)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        back
+      </button>
+      <div class="top-bar-title">suggestions</div>
+      <div class="top-bar-action" style="opacity:0">x</div>
+    </div>
+
+    <div class="suggest-header">
+      <div class="suggest-title">moments worth remembering</div>
+      <div class="suggest-sub">chosen for memory richness, not busyness</div>
+    </div>
+
+    <div class="suggest-scroll">
+
+      <!-- Suggestion 1 -->
+      <div class="sug-card density-vivid">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Mon · Mar 9 · Evening</div>
+            <div class="sug-event-title">Explore a new neighborhood with Jamie</div>
+          </div>
+          <div class="sug-density-badge vivid">vivid</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-label">why this works</div>
+        <div class="sug-why-text">Unfamiliar environments force your brain out of autopilot. When surroundings are new — the streets, the smells, the light — your memory system works harder and records more detail. Add a close friend and the emotional layer deepens the imprint.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">novelty</span>
+          <span class="sug-tag">social connection</span>
+          <span class="sug-tag">sensory richness</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Explore a new neighborhood with Jamie','Mon · Mar 9 · Evening','vivid','novelty + social')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <!-- Suggestion 2 -->
+      <div class="sug-card density-vivid">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Mon · Mar 9 · Afternoon</div>
+            <div class="sug-event-title">Call someone you've been meaning to reach</div>
+          </div>
+          <div class="sug-density-badge vivid">vivid</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-label">why this works</div>
+        <div class="sug-why-text">Reconnection is one of the most reliable triggers for emotional memory. Your brain treats socially meaningful moments as worth preserving — which is why a heartfelt conversation can feel more vivid years later than a hundred routine days.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">emotional resonance</span>
+          <span class="sug-tag">meaningful social</span>
+          <span class="sug-tag">reconnection</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Call someone you\'ve been meaning to reach','Mon · Mar 9 · Afternoon','vivid','emotional resonance + social')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <!-- Suggestion 3 -->
+      <div class="sug-card">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Tue · Mar 10 · Evening</div>
+            <div class="sug-event-title">Cook a dish from a cuisine you've never made</div>
+          </div>
+          <div class="sug-density-badge">present</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-label">why this works</div>
+        <div class="sug-why-text">First-time experiences are filed differently by your brain — with more detail and texture — because novelty signals that something worth learning is happening. The hands-on, sensory nature of cooking makes the encoding even richer.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">first time</span>
+          <span class="sug-tag">multi-sensory</span>
+          <span class="sug-tag">novelty</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Cook a dish from a new cuisine','Tue · Mar 10 · Evening','present','first time + sensory richness')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <!-- Suggestion 4 -->
+      <div class="sug-card density-vivid">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Mon · Mar 9 · Morning</div>
+            <div class="sug-event-title">Walk somewhere with no destination in mind</div>
+          </div>
+          <div class="sug-density-badge vivid">vivid</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-label">why this works</div>
+        <div class="sug-why-text">Unstructured wandering puts your attention in a curious, open state. Your hippocampus — the brain's memory hub — is also involved in spatial navigation. An exploratory walk tends to leave a richer trace than a planned one, especially in new territory.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">open attention</span>
+          <span class="sug-tag">movement</span>
+          <span class="sug-tag">spatial novelty</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Wander somewhere new','Mon · Mar 9 · Morning','vivid','open attention + movement')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <div class="manual-link" onclick="show('s-manual')">or create your own moment →</div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       SCREEN 3: CONFIRMATION
+  ══════════════════════════════════════ -->
+  <div class="screen" id="s-confirm">
+    <div class="confirm-body">
+      <div class="confirm-planted">planted ✦</div>
+
+      <!-- Confirmation flower -->
+      <div class="confirm-plant-wrap">
+        <svg width="120" height="140" viewBox="0 0 120 140" overflow="visible" class="confirm-sway">
+          <defs>
+            <radialGradient id="cpg" cx="50%" cy="90%" r="65%" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#FFF0C0" stop-opacity="1"/>
+              <stop offset="35%" stop-color="#F8C769" stop-opacity="0.95"/>
+              <stop offset="70%" stop-color="#F67840" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#CD7097" stop-opacity="0.2"/>
+            </radialGradient>
+            <filter id="cpf" x="-70%" y="-70%" width="240%" height="240%">
+              <feGaussianBlur stdDeviation="6" result="b1"/>
+              <feGaussianBlur stdDeviation="14" result="b2"/>
+              <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M60 138 C59 118 58 98 60 80" stroke="rgba(169,94,92,0.6)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M60 115 C52 106 38 102 35 94 C44 99 58 107 60 115Z" fill="rgba(169,94,92,0.35)" opacity="0.75"/>
+          <path d="M60 103 C68 94 82 90 85 82 C76 87 62 95 60 103Z" fill="rgba(169,94,92,0.3)" opacity="0.7"/>
+          <g class="confirm-glow" filter="url(#cpf)">
+            <ellipse cx="60" cy="50" rx="13" ry="30" fill="url(#cpg)" transform="rotate(0 60 80)"/>
+            <ellipse cx="60" cy="50" rx="13" ry="30" fill="url(#cpg)" opacity="0.92" transform="rotate(60 60 80)"/>
+            <ellipse cx="60" cy="50" rx="13" ry="30" fill="url(#cpg)" transform="rotate(120 60 80)"/>
+            <ellipse cx="60" cy="50" rx="13" ry="30" fill="url(#cpg)" opacity="0.92" transform="rotate(180 60 80)"/>
+            <ellipse cx="60" cy="50" rx="13" ry="30" fill="url(#cpg)" transform="rotate(240 60 80)"/>
+            <ellipse cx="60" cy="50" rx="13" ry="30" fill="url(#cpg)" opacity="0.92" transform="rotate(300 60 80)"/>
+          </g>
+          <circle cx="60" cy="80" r="14" fill="url(#cpg)" filter="url(#cpf)"/>
+          <circle cx="60" cy="80" r="9" fill="#FFF8E0"/>
+          <circle cx="60" cy="80" r="4" fill="rgba(255,255,255,0.9)"/>
+        </svg>
+      </div>
+
+      <div class="confirm-event-date" id="confirm-date">Mon · Mar 9 · Evening</div>
+      <div class="confirm-event-name" id="confirm-name">Dinner at new spot with Jamie</div>
+      <div class="confirm-density" id="confirm-density">forecast: vivid</div>
+      <div class="confirm-science" id="confirm-science">novelty and social connection together are among the most reliable signals for a memory your future self will return to.</div>
+
+      <div class="confirm-actions">
+        <a href="/garden.html" class="btn-view-garden">view in garden</a>
+        <div class="btn-add-another" onclick="show('s-choose')">add another moment</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── SCREEN TRANSITIONS ───────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  var target = document.getElementById(id);
+  if (target) target.classList.add('active');
+}
+
+// ── MANUAL ENTRY STATE ───────────────────────────────────────────────────────
+var selectedType = 'social';
+var selectedDate = 'Mar 9';
+var people = ['Jamie'];
+
+function selectType(el) {
+  document.querySelectorAll('.type-pill').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  selectedType = el.dataset.type;
+  updatePreview();
+}
+
+function selectDate(el) {
+  document.querySelectorAll('.date-chip').forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
+  selectedDate = el.dataset.date;
+}
+
+function addPerson() {
+  var name = prompt('Add someone:');
+  if (name && name.trim()) {
+    people.push(name.trim());
+    renderPeople();
+    updatePreview();
+  }
+}
+
+function renderPeople() {
+  var row = document.getElementById('people-row');
+  var chips = people.map(function(p) {
+    return '<div class="person-chip">' + p + '</div>';
+  }).join('');
+  row.innerHTML = chips + '<div class="add-chip" onclick="addPerson()">+ add someone</div>';
+}
+
+// ── DENSITY SCORING ──────────────────────────────────────────────────────────
+var DENSITY_LABELS = ['dim','dim','dim','just sprouting','present','present','vivid','vivid','luminous','luminous','luminous'];
+var DENSITY_DRIVER_MAP = {
+  social:  'social connection',
+  explore: 'novelty + exploration',
+  focus:   'focused attention',
+  rest:    'restoration',
+};
+
+function computeScore() {
+  var score = 3;
+  if (selectedType === 'social')  score += 1;
+  if (selectedType === 'explore') score += 2;
+  if (selectedType === 'focus')   score += 1;
+  if (selectedType === 'rest')    score -= 1;
+  score += Math.min(people.length, 2);
+  var place = document.getElementById('place-input');
+  if (place && place.value.trim()) score += 1;
+  return Math.max(1, Math.min(10, score));
+}
+
+function updatePreview() {
+  var score = computeScore();
+  var label = DENSITY_LABELS[score] || 'present';
+  var preview = document.getElementById('density-preview');
+  var labelEl = document.getElementById('preview-label');
+  var driversEl = document.getElementById('preview-drivers');
+
+  // Update label
+  if (labelEl) labelEl.textContent = label;
+
+  // Update drivers text
+  var drivers = DENSITY_DRIVER_MAP[selectedType] || 'focused experience';
+  if (people.length > 0) drivers = 'social connection + ' + DENSITY_DRIVER_MAP[selectedType];
+  var place = document.getElementById('place-input');
+  if (place && place.value.trim() && selectedType !== 'explore') drivers += ' + new place';
+  if (driversEl) driversEl.textContent = drivers;
+
+  // Update card glow class
+  if (preview) {
+    preview.classList.remove('vivid','luminous');
+    if (score >= 8) preview.classList.add('luminous');
+    else if (score >= 6) preview.classList.add('vivid');
+  }
+}
+
+// ── CONFIRM (MANUAL) ─────────────────────────────────────────────────────────
+function confirmEvent() {
+  var name = document.getElementById('event-name').value || 'Untitled moment';
+  var date = selectedDate;
+  var score = computeScore();
+  var label = DENSITY_LABELS[score] || 'present';
+  var drivers = DENSITY_DRIVER_MAP[selectedType] || '';
+  if (people.length > 0) drivers = 'social connection and ' + DENSITY_DRIVER_MAP[selectedType];
+
+  var scienceMap = {
+    social:  'Memories made with people we care about tend to last. Emotional resonance signals to your brain that this moment is worth preserving.',
+    explore: 'Unfamiliar environments force your brain out of autopilot — encoding more detail, making the experience feel longer and more alive.',
+    focus:   'Sustained attention creates dense, detailed encoding. The opposite of a day that blurs past on autopilot.',
+    rest:    'Rest and recovery are essential. Even quieter days give the garden room to breathe.',
+  };
+
+  document.getElementById('confirm-date').textContent = date;
+  document.getElementById('confirm-name').textContent = name;
+  document.getElementById('confirm-density').textContent = 'forecast: ' + label;
+  document.getElementById('confirm-science').textContent = scienceMap[selectedType] || '';
+  show('s-confirm');
+}
+
+// ── CONFIRM (SUGGESTION) ─────────────────────────────────────────────────────
+function confirmSuggestion(name, date, density, drivers) {
+  var scienceMap = {
+    'vivid':   'novelty and social connection together are among the most reliable signals for a memory your future self will return to.',
+    'present': 'first-time experiences are filed with more detail than repeat ones — your brain records everything because it cannot predict what comes next.',
+  };
+  document.getElementById('confirm-date').textContent = date;
+  document.getElementById('confirm-name').textContent = name;
+  document.getElementById('confirm-density').textContent = 'forecast: ' + density;
+  document.getElementById('confirm-science').textContent = scienceMap[density] || 'a moment chosen with intention tends to be a moment remembered.';
+  show('s-confirm');
+}
+
+// Init
+updatePreview();
+</script>
+</body>
+</html>
