@@ -436,6 +436,18 @@ html, body {
   background:rgba(248,199,105,0.1); border:1px solid rgba(248,199,105,0.25);
   color:rgba(248,199,105,0.7); text-shadow:0 0 12px rgba(248,199,105,0.2);
 }
+/* home screen layout */
+.home-manual-btn {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; border-radius:14px; cursor:pointer; margin-bottom:24px;
+  background:rgba(95,64,69,0.12); border:1px solid rgba(95,64,69,0.28);
+  transition:background 0.2s, border-color 0.2s;
+}
+.home-manual-btn:active { background:rgba(95,64,69,0.2); }
+.home-sug-label {
+  font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+  color:rgba(206,168,154,0.25); margin-bottom:12px;
+}
 .btn-add-another {
   padding:12px 0; border-radius:14px; text-align:center; cursor:pointer;
   font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
@@ -448,74 +460,125 @@ html, body {
 <div class="phone">
 
   <!-- ══════════════════════════════════════
-       SCREEN 1: CHOOSE PATH
+       SCREEN 1: HOME (manual CTA + suggestions)
   ══════════════════════════════════════ -->
   <div class="screen active" id="s-choose">
-
-    <!-- blurred garden hint behind sheet -->
-    <div class="choose-bg">
-      <div class="garden-bg-hint">
-        <!-- faint plant silhouette -->
-        <svg class="bg-plant-hint" width="90" height="130" viewBox="0 0 90 130" overflow="visible">
-          <path d="M45 128 C44 108 42 88 45 70" stroke="rgba(169,94,92,0.8)" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <path d="M45 100 C38 92 25 88 22 80 C30 85 43 92 45 100Z" fill="rgba(169,94,92,0.5)"/>
-          <path d="M45 88 C52 80 65 76 68 68 C60 73 47 80 45 88Z" fill="rgba(169,94,92,0.4)"/>
-          <g opacity="0.55">
-            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.35)" transform="rotate(0 45 70)"/>
-            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.3)" transform="rotate(60 45 70)"/>
-            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.35)" transform="rotate(120 45 70)"/>
-            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.3)" transform="rotate(180 45 70)"/>
-            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.35)" transform="rotate(240 45 70)"/>
-            <ellipse cx="45" cy="44" rx="12" ry="28" fill="rgba(248,199,105,0.3)" transform="rotate(300 45 70)"/>
-          </g>
-          <circle cx="45" cy="70" r="10" fill="rgba(248,199,105,0.5)"/>
-        </svg>
-      </div>
+    <div class="top-bar">
+      <button class="back-btn" onclick="window.history.back()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="rgba(206,168,154,0.5)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        back
+      </button>
+      <div class="top-bar-title">plant a moment</div>
+      <div style="opacity:0;font-size:11px">x</div>
     </div>
 
-    <!-- sheet -->
-    <div class="choose-sheet">
-      <div class="sheet-handle"></div>
+    <div style="padding:12px 28px 20px;flex-shrink:0;">
       <div class="choose-title">add to your garden</div>
       <div class="choose-sub">what kind of moment are you planting?</div>
-      <div class="choose-options">
+    </div>
 
-        <div class="choose-card suggested" onclick="show('s-suggest')">
-          <div class="card-icon">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="3" fill="rgba(248,199,105,0.8)"/>
-              <circle cx="10" cy="10" r="6" fill="none" stroke="rgba(248,199,105,0.4)" stroke-width="0.8"/>
-              <line x1="10" y1="2" x2="10" y2="4" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
-              <line x1="10" y1="16" x2="10" y2="18" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
-              <line x1="2" y1="10" x2="4" y2="10" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
-              <line x1="16" y1="10" x2="18" y2="10" stroke="rgba(248,199,105,0.5)" stroke-width="1.2" stroke-linecap="round"/>
-              <line x1="4.2" y1="4.2" x2="5.6" y2="5.6" stroke="rgba(248,199,105,0.4)" stroke-width="1" stroke-linecap="round"/>
-              <line x1="14.4" y1="14.4" x2="15.8" y2="15.8" stroke="rgba(248,199,105,0.4)" stroke-width="1" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="card-text">
-            <div class="card-title">Find something memorable</div>
-            <div class="card-desc">ideas chosen for memory richness</div>
-          </div>
-          <div class="card-arrow">›</div>
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 24px 32px;">
+
+      <!-- Manual CTA -->
+      <div class="home-manual-btn" onclick="show('s-manual')">
+        <div>
+          <div style="font-size:13px;font-weight:400;color:rgba(206,168,154,0.7);letter-spacing:0.04em;margin-bottom:2px;">create your own event</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:rgba(206,168,154,0.3);">name it, time it, make it yours</div>
         </div>
-
-        <div class="choose-card" onclick="show('s-manual')">
-          <div class="card-icon">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M3 13.5L3.5 10.5L12 2L16 6L7.5 14.5L4.5 15Z" stroke="rgba(206,168,154,0.6)" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
-              <path d="M11 3.5L14.5 7" stroke="rgba(206,168,154,0.5)" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="card-text">
-            <div class="card-title">Create an event</div>
-            <div class="card-desc">manually plan a moment</div>
-          </div>
-          <div class="card-arrow">›</div>
-        </div>
-
+        <span style="font-size:18px;color:rgba(206,168,154,0.35);line-height:1">›</span>
       </div>
-      <div class="cancel-row" onclick="window.history.back()">cancel</div>
+
+      <!-- Suggestions -->
+      <div class="home-sug-label">suggested for you</div>
+
+      <!-- Suggestion 1 -->
+      <div class="sug-card density-vivid">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Mon · Mar 9 · Evening</div>
+            <div class="sug-event-title">Explore a new neighborhood with Jamie</div>
+          </div>
+          <div class="sug-density-badge vivid">vivid</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-text">New surroundings force your brain off autopilot — it records more when it can't predict what's next. A friend deepens the imprint.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">novelty</span>
+          <span class="sug-tag">social connection</span>
+          <span class="sug-tag">sensory richness</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Explore a new neighborhood with Jamie','Mon · Mar 9 · Evening','vivid','novelty + social')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <!-- Suggestion 2 -->
+      <div class="sug-card density-vivid">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Mon · Mar 9 · Afternoon</div>
+            <div class="sug-event-title">Call someone you've been meaning to reach</div>
+          </div>
+          <div class="sug-density-badge vivid">vivid</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-text">Reconnection reliably triggers emotional memory. A heartfelt conversation can feel more vivid years later than a hundred routine days.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">emotional resonance</span>
+          <span class="sug-tag">meaningful social</span>
+          <span class="sug-tag">reconnection</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Call someone you\'ve been meaning to reach','Mon · Mar 9 · Afternoon','vivid','emotional resonance + social')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <!-- Suggestion 3 -->
+      <div class="sug-card">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Tue · Mar 10 · Evening</div>
+            <div class="sug-event-title">Cook a dish from a cuisine you've never made</div>
+          </div>
+          <div class="sug-density-badge">present</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-text">First-time experiences are filed with more detail — your brain pays closer attention when it doesn't know what to expect.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">first time</span>
+          <span class="sug-tag">multi-sensory</span>
+          <span class="sug-tag">novelty</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Cook a dish from a new cuisine','Tue · Mar 10 · Evening','present','first time + sensory richness')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
+      <!-- Suggestion 4 -->
+      <div class="sug-card density-vivid">
+        <div class="sug-card-top">
+          <div>
+            <div class="sug-day-badge">Mon · Mar 9 · Morning</div>
+            <div class="sug-event-title">Walk somewhere with no destination in mind</div>
+          </div>
+          <div class="sug-density-badge vivid">vivid</div>
+        </div>
+        <div class="sug-divider"></div>
+        <div class="sug-why-text">Unstructured wandering puts you in an open, curious state that leaves a richer memory trace than a planned route.</div>
+        <div class="sug-tags">
+          <span class="sug-tag">open attention</span>
+          <span class="sug-tag">movement</span>
+          <span class="sug-tag">spatial novelty</span>
+        </div>
+        <div class="sug-actions">
+          <div class="btn-add-this" onclick="confirmSuggestion('Wander somewhere new','Mon · Mar 9 · Morning','vivid','open attention + movement')">Plant this ✦</div>
+          <div class="btn-day-pick">change day</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -540,31 +603,6 @@ html, body {
       <input class="event-name-input" id="event-name" type="text"
         placeholder="give it a name..." value="Dinner at new spot with Jamie"
         oninput="updatePreview()">
-
-      <!-- Type -->
-      <div class="section-label">what kind of day?</div>
-      <div class="type-grid">
-        <div class="type-pill active" data-type="social" onclick="selectType(this)">
-          <div class="type-pill-icon">✦</div>
-          <span class="type-pill-name">Social</span>
-          <span class="type-pill-why">connection deepens memory</span>
-        </div>
-        <div class="type-pill" data-type="explore" onclick="selectType(this)">
-          <div class="type-pill-icon">◎</div>
-          <span class="type-pill-name">Explore</span>
-          <span class="type-pill-why">novelty creates vivid traces</span>
-        </div>
-        <div class="type-pill" data-type="focus" onclick="selectType(this)">
-          <div class="type-pill-icon">◇</div>
-          <span class="type-pill-name">Focus</span>
-          <span class="type-pill-why">attention creates depth</span>
-        </div>
-        <div class="type-pill" data-type="rest" onclick="selectType(this)">
-          <div class="type-pill-icon">○</div>
-          <span class="type-pill-name">Rest</span>
-          <span class="type-pill-why">renewal, quieter memory</span>
-        </div>
-      </div>
 
       <!-- Date -->
       <div class="section-label">when?</div>
@@ -644,124 +682,6 @@ html, body {
       </div>
 
       <button class="plant-btn" onclick="confirmEvent()">plant this event ✦</button>
-
-    </div>
-  </div>
-
-
-  <!-- ══════════════════════════════════════
-       SCREEN 2b: SUGGESTIONS
-  ══════════════════════════════════════ -->
-  <div class="screen" id="s-suggest">
-    <div class="top-bar" style="padding-bottom:0;">
-      <button class="back-btn" onclick="show('s-choose')">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="rgba(206,168,154,0.5)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        back
-      </button>
-      <div class="top-bar-title">suggestions</div>
-      <div class="top-bar-action" style="opacity:0">x</div>
-    </div>
-
-    <div class="suggest-header">
-      <div class="suggest-title">moments worth remembering</div>
-      <div class="suggest-sub">chosen for memory richness, not busyness</div>
-    </div>
-
-    <div class="suggest-scroll">
-
-      <!-- Suggestion 1 -->
-      <div class="sug-card density-vivid">
-        <div class="sug-card-top">
-          <div>
-            <div class="sug-day-badge">Mon · Mar 9 · Evening</div>
-            <div class="sug-event-title">Explore a new neighborhood with Jamie</div>
-          </div>
-          <div class="sug-density-badge vivid">vivid</div>
-        </div>
-        <div class="sug-divider"></div>
-        <div class="sug-why-label">why this works</div>
-        <div class="sug-why-text">Unfamiliar environments force your brain out of autopilot. When surroundings are new — the streets, the smells, the light — your memory system works harder and records more detail. Add a close friend and the emotional layer deepens the imprint.</div>
-        <div class="sug-tags">
-          <span class="sug-tag">novelty</span>
-          <span class="sug-tag">social connection</span>
-          <span class="sug-tag">sensory richness</span>
-        </div>
-        <div class="sug-actions">
-          <div class="btn-add-this" onclick="confirmSuggestion('Explore a new neighborhood with Jamie','Mon · Mar 9 · Evening','vivid','novelty + social')">Plant this ✦</div>
-          <div class="btn-day-pick">change day</div>
-        </div>
-      </div>
-
-      <!-- Suggestion 2 -->
-      <div class="sug-card density-vivid">
-        <div class="sug-card-top">
-          <div>
-            <div class="sug-day-badge">Mon · Mar 9 · Afternoon</div>
-            <div class="sug-event-title">Call someone you've been meaning to reach</div>
-          </div>
-          <div class="sug-density-badge vivid">vivid</div>
-        </div>
-        <div class="sug-divider"></div>
-        <div class="sug-why-label">why this works</div>
-        <div class="sug-why-text">Reconnection is one of the most reliable triggers for emotional memory. Your brain treats socially meaningful moments as worth preserving — which is why a heartfelt conversation can feel more vivid years later than a hundred routine days.</div>
-        <div class="sug-tags">
-          <span class="sug-tag">emotional resonance</span>
-          <span class="sug-tag">meaningful social</span>
-          <span class="sug-tag">reconnection</span>
-        </div>
-        <div class="sug-actions">
-          <div class="btn-add-this" onclick="confirmSuggestion('Call someone you\'ve been meaning to reach','Mon · Mar 9 · Afternoon','vivid','emotional resonance + social')">Plant this ✦</div>
-          <div class="btn-day-pick">change day</div>
-        </div>
-      </div>
-
-      <!-- Suggestion 3 -->
-      <div class="sug-card">
-        <div class="sug-card-top">
-          <div>
-            <div class="sug-day-badge">Tue · Mar 10 · Evening</div>
-            <div class="sug-event-title">Cook a dish from a cuisine you've never made</div>
-          </div>
-          <div class="sug-density-badge">present</div>
-        </div>
-        <div class="sug-divider"></div>
-        <div class="sug-why-label">why this works</div>
-        <div class="sug-why-text">First-time experiences are filed differently by your brain — with more detail and texture — because novelty signals that something worth learning is happening. The hands-on, sensory nature of cooking makes the encoding even richer.</div>
-        <div class="sug-tags">
-          <span class="sug-tag">first time</span>
-          <span class="sug-tag">multi-sensory</span>
-          <span class="sug-tag">novelty</span>
-        </div>
-        <div class="sug-actions">
-          <div class="btn-add-this" onclick="confirmSuggestion('Cook a dish from a new cuisine','Tue · Mar 10 · Evening','present','first time + sensory richness')">Plant this ✦</div>
-          <div class="btn-day-pick">change day</div>
-        </div>
-      </div>
-
-      <!-- Suggestion 4 -->
-      <div class="sug-card density-vivid">
-        <div class="sug-card-top">
-          <div>
-            <div class="sug-day-badge">Mon · Mar 9 · Morning</div>
-            <div class="sug-event-title">Walk somewhere with no destination in mind</div>
-          </div>
-          <div class="sug-density-badge vivid">vivid</div>
-        </div>
-        <div class="sug-divider"></div>
-        <div class="sug-why-label">why this works</div>
-        <div class="sug-why-text">Unstructured wandering puts your attention in a curious, open state. Your hippocampus — the brain's memory hub — is also involved in spatial navigation. An exploratory walk tends to leave a richer trace than a planned one, especially in new territory.</div>
-        <div class="sug-tags">
-          <span class="sug-tag">open attention</span>
-          <span class="sug-tag">movement</span>
-          <span class="sug-tag">spatial novelty</span>
-        </div>
-        <div class="sug-actions">
-          <div class="btn-add-this" onclick="confirmSuggestion('Wander somewhere new','Mon · Mar 9 · Morning','vivid','open attention + movement')">Plant this ✦</div>
-          <div class="btn-day-pick">change day</div>
-        </div>
-      </div>
-
-      <div class="manual-link" onclick="show('s-manual')">or create your own moment →</div>
 
     </div>
   </div>
