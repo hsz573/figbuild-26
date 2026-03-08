@@ -224,7 +224,7 @@ html, body {
 
 /* density preview */
 .density-preview {
-  display:flex; align-items:center; gap:16px;
+  display:flex; flex-direction:column;
   padding:16px 18px; border-radius:16px;
   background:rgba(95,64,69,0.08); border:1px solid rgba(95,64,69,0.2);
   margin-bottom:24px; transition:border-color 0.4s, background 0.4s;
@@ -235,8 +235,11 @@ html, body {
 .density-preview.luminous {
   border-color:rgba(248,199,105,0.3); background:rgba(248,199,105,0.07);
 }
-.preview-plant { flex-shrink:0; width:48px; height:60px; position:relative; }
-.preview-plant svg { overflow:visible; }
+/* event row (ember + label) */
+.preview-event-row { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.preview-ember { flex-shrink:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
+@keyframes emberPulse { 0%,100%{opacity:0.8;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
+.preview-ember svg { animation:emberPulse 3s ease-in-out infinite; overflow:visible; }
 .preview-text { flex:1; }
 .preview-eyebrow {
   font-size:8px; letter-spacing:0.15em; text-transform:uppercase;
@@ -255,6 +258,28 @@ html, body {
 }
 .density-preview.vivid .preview-drivers    { color:rgba(248,199,105,0.4); }
 .density-preview.luminous .preview-drivers { color:rgba(248,199,105,0.5); }
+/* day impact */
+.preview-divider { height:1px; background:rgba(95,64,69,0.2); margin-bottom:12px; }
+.impact-header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.impact-day-name { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(206,168,154,0.3); }
+.impact-delta { display:flex; align-items:center; gap:5px; }
+.impact-before {
+  font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic;
+  color:rgba(206,168,154,0.4);
+}
+.impact-arrow { font-size:10px; color:rgba(95,64,69,0.45); }
+.impact-after {
+  font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic;
+  color:rgba(248,199,105,0.75); text-shadow:0 0 8px rgba(248,199,105,0.2);
+  transition:color 0.4s;
+}
+.density-preview.luminous .impact-after { color:rgba(255,240,160,0.9); text-shadow:0 0 12px rgba(248,199,105,0.35); }
+.impact-wave-wrap { width:100%; overflow:hidden; margin-bottom:5px; }
+.impact-wave-wrap svg { display:block; }
+.impact-caption {
+  font-family:'Cormorant Garamond',serif; font-size:11px; font-style:italic;
+  color:rgba(206,168,154,0.28); text-align:right;
+}
 
 /* plant button */
 .plant-btn {
@@ -554,7 +579,7 @@ html, body {
 
       <!-- Time -->
       <div class="section-label">time</div>
-      <div class="time-row">
+      <div class="time-row" onclick="cycleTime()" style="cursor:pointer">
         <div class="time-display" id="time-display">7:00 PM</div>
         <div class="time-hint">tap to change</div>
       </div>
@@ -575,37 +600,46 @@ html, body {
 
       <!-- Density preview -->
       <div class="density-preview vivid" id="density-preview">
-        <div class="preview-plant">
-          <svg width="48" height="60" viewBox="0 0 48 60" overflow="visible" id="preview-svg">
-            <defs>
-              <radialGradient id="ppg" cx="50%" cy="90%" r="60%" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#F8C769" stop-opacity="0.9"/>
-                <stop offset="50%" stop-color="#F67840" stop-opacity="0.7"/>
-                <stop offset="100%" stop-color="#CD7097" stop-opacity="0.15"/>
-              </radialGradient>
-              <filter id="ppf" x="-80%" y="-80%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="4" result="b1"/>
-                <feGaussianBlur stdDeviation="9" result="b2"/>
-                <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <path d="M24 58 C23 48 22 38 24 30" stroke="rgba(169,94,92,0.5)" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <g filter="url(#ppf)" id="preview-petals">
-              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" transform="rotate(0 24 30)"/>
-              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" opacity="0.9" transform="rotate(60 24 30)"/>
-              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" transform="rotate(120 24 30)"/>
-              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" opacity="0.9" transform="rotate(180 24 30)"/>
-              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" transform="rotate(240 24 30)"/>
-              <ellipse cx="24" cy="16" rx="6" ry="14" fill="url(#ppg)" opacity="0.9" transform="rotate(300 24 30)"/>
-            </g>
-            <circle cx="24" cy="30" r="7" fill="#F8C769" opacity="0.9"/>
-            <circle cx="24" cy="30" r="3.5" fill="rgba(255,255,255,0.7)"/>
-          </svg>
+        <!-- Event density row -->
+        <div class="preview-event-row">
+          <div class="preview-ember">
+            <svg width="36" height="36" viewBox="0 0 36 36" overflow="visible">
+              <defs>
+                <radialGradient id="emg" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+                  <stop offset="30%" stop-color="#F8C769" stop-opacity="0.9"/>
+                  <stop offset="65%" stop-color="#F67840" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="#CD7097" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="emf" x="-150%" y="-150%" width="400%" height="400%">
+                  <feGaussianBlur stdDeviation="5" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <circle cx="18" cy="18" r="14" fill="url(#emg)" filter="url(#emf)"/>
+              <circle cx="18" cy="18" r="5.5" fill="#F8C769" opacity="0.88"/>
+              <circle cx="18" cy="18" r="2.5" fill="rgba(255,255,255,0.92)"/>
+            </svg>
+          </div>
+          <div class="preview-text">
+            <div class="preview-eyebrow">this moment could be</div>
+            <div class="preview-density-label" id="preview-label">vivid</div>
+            <div class="preview-drivers" id="preview-drivers">novelty + social connection</div>
+          </div>
         </div>
-        <div class="preview-text">
-          <div class="preview-eyebrow">this could be</div>
-          <div class="preview-density-label" id="preview-label">vivid</div>
-          <div class="preview-drivers" id="preview-drivers">novelty + social connection</div>
+        <!-- Day impact -->
+        <div class="preview-divider"></div>
+        <div>
+          <div class="impact-header-row">
+            <span class="impact-day-name" id="impact-day-name">monday, mar 9</span>
+            <div class="impact-delta">
+              <span class="impact-before" id="impact-before">planned</span>
+              <span class="impact-arrow">→</span>
+              <span class="impact-after" id="impact-after">vivid</span>
+            </div>
+          </div>
+          <div class="impact-wave-wrap" id="impact-wave"></div>
+          <div class="impact-caption" id="impact-caption">vivid peak at 7:00 PM</div>
         </div>
       </div>
 
@@ -797,10 +831,77 @@ function show(id) {
   if (target) target.classList.add('active');
 }
 
+// ── DAY BASELINE DATA ─────────────────────────────────────────────────────────
+// 16 bars: 6am–9pm in hourly slots (0–10 scale)
+var DAY_DATA = {
+  'Mar 8':  {name:'sunday, mar 8',     densities:[2,2,4,5,8,6,4,2,2,2,3,5,7,6,3,2]},
+  'Mar 9':  {name:'monday, mar 9',     densities:[1,2,3,4,5,4,3,2,2,2,3,3,4,3,2,1]},
+  'Mar 10': {name:'tuesday, mar 10',   densities:[1,1,2,3,3,3,3,2,2,4,5,4,3,2,2,1]},
+  'Mar 11': {name:'wednesday, mar 11', densities:[1,1,1,2,2,3,3,2,2,2,2,3,3,2,2,1]},
+  'Mar 12': {name:'thursday, mar 12',  densities:[1,2,3,4,4,4,3,2,2,2,2,3,4,4,3,2]},
+  'Mar 13': {name:'friday, mar 13',    densities:[1,1,2,3,4,5,5,3,2,2,3,4,5,4,3,2]},
+};
+
+var TIME_OPTIONS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM',
+                    '1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM',
+                    '6:00 PM','7:00 PM','8:00 PM'];
+var TIME_TO_INDEX = {
+  '6:00 AM':0,'7:00 AM':1,'8:00 AM':2,'9:00 AM':3,'10:00 AM':4,'11:00 AM':5,
+  '12:00 PM':6,'1:00 PM':7,'2:00 PM':8,'3:00 PM':9,'4:00 PM':10,'5:00 PM':11,
+  '6:00 PM':12,'7:00 PM':13,'8:00 PM':14,'9:00 PM':15
+};
+
+function avgDensityLabel(densities) {
+  var avg = densities.reduce(function(a,b){return a+b;},0) / densities.length;
+  if (avg < 1.8) return 'dim';
+  if (avg < 2.6) return 'just sprouting';
+  if (avg < 3.8) return 'present';
+  if (avg < 5.2) return 'vivid';
+  return 'luminous';
+}
+
+function buildImpactWave(baseDensities, eventIndex, eventScore) {
+  var W=11, SLOT=18, X0=3, BASE=26, MAXH=22;
+  var totalW = X0 * 2 + 16 * SLOT;
+  var bars = '';
+  baseDensities.forEach(function(d, i) {
+    var x = (X0 + i * SLOT).toFixed(1);
+    if (i === eventIndex) {
+      var eh = Math.max(2, (eventScore / 10) * MAXH);
+      var ey = (BASE - eh).toFixed(1);
+      bars += '<rect x="' + x + '" y="' + ey + '" width="' + W + '" height="' + eh.toFixed(1) + '" rx="2.5"';
+      bars += ' fill="url(#iwEG)" filter="url(#iwGlow)"/>';
+    } else {
+      var h = Math.max(1.5, (d / 10) * MAXH);
+      var y = (BASE - h).toFixed(1);
+      bars += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + h.toFixed(1) + '" rx="1.5"';
+      bars += ' fill="rgba(95,64,69,0.28)"/>';
+    }
+  });
+  var defs = '<defs>' +
+    '<linearGradient id="iwEG" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="#F8C769" stop-opacity="0.95"/>' +
+    '<stop offset="100%" stop-color="#F67840" stop-opacity="0.65"/>' +
+    '</linearGradient>' +
+    '<filter id="iwGlow" x="-80%" y="-80%" width="260%" height="260%">' +
+    '<feGaussianBlur stdDeviation="2.5" result="b"/>' +
+    '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+    '</filter></defs>';
+  return '<svg width="' + totalW + '" height="' + (BASE + 4) + '">' + defs + bars + '</svg>';
+}
+
 // ── MANUAL ENTRY STATE ───────────────────────────────────────────────────────
 var selectedType = 'social';
 var selectedDate = 'Mar 9';
+var selectedTime = '7:00 PM';
 var people = ['Jamie'];
+
+function cycleTime() {
+  var idx = TIME_OPTIONS.indexOf(selectedTime);
+  selectedTime = TIME_OPTIONS[(idx + 1) % TIME_OPTIONS.length];
+  document.getElementById('time-display').textContent = selectedTime;
+  updatePreview();
+}
 
 function selectType(el) {
   document.querySelectorAll('.type-pill').forEach(function(p) { p.classList.remove('active'); });
@@ -813,6 +914,7 @@ function selectDate(el) {
   document.querySelectorAll('.date-chip').forEach(function(c) { c.classList.remove('active'); });
   el.classList.add('active');
   selectedDate = el.dataset.date;
+  updatePreview();
 }
 
 function addPerson() {
@@ -860,22 +962,43 @@ function updatePreview() {
   var labelEl = document.getElementById('preview-label');
   var driversEl = document.getElementById('preview-drivers');
 
-  // Update label
+  // Event density label + drivers
   if (labelEl) labelEl.textContent = label;
-
-  // Update drivers text
   var drivers = DENSITY_DRIVER_MAP[selectedType] || 'focused experience';
   if (people.length > 0) drivers = 'social connection + ' + DENSITY_DRIVER_MAP[selectedType];
   var place = document.getElementById('place-input');
   if (place && place.value.trim() && selectedType !== 'explore') drivers += ' + new place';
   if (driversEl) driversEl.textContent = drivers;
 
-  // Update card glow class
+  // Card glow class
   if (preview) {
     preview.classList.remove('vivid','luminous');
     if (score >= 8) preview.classList.add('luminous');
     else if (score >= 6) preview.classList.add('vivid');
   }
+
+  // Day impact section
+  var dayInfo = DAY_DATA[selectedDate] || DAY_DATA['Mar 9'];
+  var timeIdx = TIME_TO_INDEX[selectedTime] !== undefined ? TIME_TO_INDEX[selectedTime] : 13;
+
+  var dayNameEl = document.getElementById('impact-day-name');
+  if (dayNameEl) dayNameEl.textContent = dayInfo.name;
+
+  var beforeLabel = avgDensityLabel(dayInfo.densities);
+  var updated = dayInfo.densities.slice();
+  updated[timeIdx] = Math.max(updated[timeIdx], score);
+  var afterLabel = avgDensityLabel(updated);
+
+  var beforeEl = document.getElementById('impact-before');
+  var afterEl  = document.getElementById('impact-after');
+  if (beforeEl) beforeEl.textContent = beforeLabel;
+  if (afterEl)  afterEl.textContent  = afterLabel;
+
+  var waveEl = document.getElementById('impact-wave');
+  if (waveEl) waveEl.innerHTML = buildImpactWave(dayInfo.densities, timeIdx, score);
+
+  var capEl = document.getElementById('impact-caption');
+  if (capEl) capEl.textContent = label + ' peak at ' + selectedTime;
 }
 
 // ── CONFIRM (MANUAL) ─────────────────────────────────────────────────────────
