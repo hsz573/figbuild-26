@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Night Garden — Garden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:#0A0408; --sun:#F8C769; --tangerine:#F67840;
+  --peony:#CD7097; --brick:#B53A2D; --terra:#A95E5C;
+  --almond:#CEA89A; --plum:#5F4045;
+}
+html, body {
+  width:100%; min-height:100vh; background:#060304;
+  display:flex; justify-content:center; align-items:flex-start;
+  font-family:'DM Sans',sans-serif;
+}
+.phone {
+  width:390px; height:844px; background:var(--black);
+  position:relative; overflow:hidden; display:flex; flex-direction:column;
+}
+.phone::before {
+  content:''; position:absolute; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:1; opacity:0.5;
+}
+.phone::after {
+  content:''; position:absolute; bottom:20%; left:50%; transform:translateX(-50%);
+  width:340px; height:260px;
+  background:radial-gradient(ellipse,rgba(95,64,69,0.08) 0%,transparent 70%);
+  pointer-events:none; z-index:0;
+}
+
+/* STATUS BAR */
+.status-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 24px 0; position:relative; z-index:10; flex-shrink:0;
+}
+.status-time { font-size:15px; font-weight:500; color:rgba(206,168,154,0.7); letter-spacing:0.02em; }
+.status-icons { display:flex; gap:6px; align-items:center; }
+
+/* HEADER */
+.garden-header { padding:16px 28px 0; position:relative; z-index:10; flex-shrink:0; }
+.week-range { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(206,168,154,0.3); margin-bottom:3px; }
+.garden-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; font-style:italic; color:rgba(206,168,154,0.85); line-height:1.1; }
+.garden-sub { font-family:'Cormorant Garamond',serif; font-size:13px; font-weight:300; font-style:italic; color:rgba(206,168,154,0.3); margin-top:1px; }
+
+/* LEGEND */
+.legend { display:flex; gap:18px; padding:10px 28px 0; position:relative; z-index:10; flex-shrink:0; }
+.legend-item { display:flex; align-items:center; gap:5px; font-size:9px; font-weight:300; letter-spacing:0.1em; color:rgba(206,168,154,0.3); text-transform:uppercase; }
+.legend-dot { width:6px; height:6px; border-radius:50%; }
+.legend-dot.flower   { background:rgba(246,120,64,0.6); }
+.legend-dot.mushroom { background:rgba(169,94,92,0.6); }
+.legend-dot.cluster  { background:rgba(95,64,69,0.6); }
+
+/* PLANT BED */
+.plant-bed-outer { position:relative; z-index:10; flex-shrink:0; margin-top:12px; }
+.plant-bed {
+  display:flex; align-items:flex-end; gap:6px;
+  overflow-x:auto; overflow-y:visible;
+  padding:20px 28px 0; scrollbar-width:none; -ms-overflow-style:none;
+}
+.plant-bed::-webkit-scrollbar { display:none; }
+
+/* GROUND LINE */
+.ground-line {
+  height:1px; margin:0 28px; position:relative; z-index:10; flex-shrink:0;
+  background:linear-gradient(to right,transparent 0%,rgba(95,64,69,0.25) 15%,rgba(95,64,69,0.35) 50%,rgba(95,64,69,0.25) 85%,transparent 100%);
+}
+
+/* DAY CARD */
+.day-card {
+  display:flex; flex-direction:column; align-items:center;
+  flex-shrink:0; cursor:pointer; position:relative; width:76px;
+  border-radius:12px; transition:background 0.2s;
+}
+.day-card.today-card { width:96px; }
+.day-card.selected { background:rgba(248,199,105,0.04); }
+.day-card.selected .day-dow  { color:rgba(248,199,105,0.7); }
+.day-card.selected .day-date { color:rgba(248,199,105,0.45); }
+.day-card.selected .day-density { color:rgba(248,199,105,0.6); text-shadow:0 0 8px rgba(248,199,105,0.25); }
+/* selected indicator dot */
+.day-card::after {
+  content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+  width:0; height:0; border-radius:50%;
+  background:rgba(248,199,105,0.7); transition:width 0.2s,height 0.2s;
+}
+.day-card.selected::after { width:4px; height:4px; box-shadow:0 0 6px rgba(248,199,105,0.5); }
+
+/* TODAY ring */
+.today-ring {
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:96px; height:100%; border-radius:48px;
+  border:1px solid rgba(248,199,105,0.12);
+  box-shadow:0 0 20px rgba(248,199,105,0.06),inset 0 0 30px rgba(248,199,105,0.03);
+  pointer-events:none; z-index:0;
+}
+.day-card svg { display:block; overflow:visible; position:relative; z-index:1; }
+
+/* DAY LABELS */
+.day-labels {
+  display:flex; flex-direction:column; align-items:center;
+  padding:6px 0 14px; gap:1px; position:relative; z-index:1;
+}
+.day-dow  { font-size:9px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; color:rgba(206,168,154,0.35); }
+.day-date { font-size:10px; font-weight:300; color:rgba(206,168,154,0.25); letter-spacing:0.04em; }
+.day-density { font-family:'Cormorant Garamond',serif; font-size:10px; font-style:italic; color:rgba(206,168,154,0.25); margin-top:2px; }
+.today-card .day-dow  { color:rgba(248,199,105,0.7); }
+.today-card .day-date { color:rgba(248,199,105,0.5); }
+.today-card .day-density { color:rgba(248,199,105,0.6); text-shadow:0 0 8px rgba(248,199,105,0.3); }
+
+/* ANIMATIONS */
+@keyframes sway { 0%,100%{transform:rotate(-1.5deg)} 50%{transform:rotate(1.5deg)} }
+@keyframes glowPulse { 0%,100%{opacity:0.85} 50%{opacity:1} }
+.today-plant  { animation:sway 6s ease-in-out infinite; transform-origin:48px 160px; }
+.today-petals { animation:glowPulse 3s ease-in-out infinite; }
+
+/* DETAIL PANEL */
+.detail-panel {
+  flex:1; margin:0 20px 0;
+  background:rgba(14,6,10,0.7);
+  border:1px solid rgba(95,64,69,0.22);
+  border-radius:20px 20px 0 0;
+  position:relative; z-index:10;
+  display:flex; flex-direction:column; overflow:hidden; min-height:0;
+  transition:border-color 0.3s;
+}
+.detail-panel.future-panel { border-color:rgba(205,112,151,0.18); }
+
+/* panel interior pieces (injected by JS) */
+.detail-handle { width:36px; height:3px; background:rgba(95,64,69,0.35); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
+.detail-header { padding:10px 20px 0; display:flex; align-items:baseline; justify-content:space-between; flex-shrink:0; gap:8px; }
+.detail-day-name { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; font-style:italic; color:rgba(206,168,154,0.85); }
+.detail-header-right { display:flex; align-items:center; gap:7px; flex-shrink:0; }
+.detail-label { font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic; }
+.detail-label.warm   { color:rgba(248,199,105,0.6); text-shadow:0 0 10px rgba(248,199,105,0.3); }
+.detail-label.muted  { color:rgba(206,168,154,0.45); }
+.detail-label.future { color:rgba(205,112,151,0.6); text-shadow:0 0 10px rgba(205,112,151,0.2); }
+.detail-badge {
+  font-size:8px; letter-spacing:0.1em; text-transform:uppercase;
+  padding:2px 7px; border-radius:10px; flex-shrink:0;
+}
+.detail-badge.in-progress { color:rgba(248,199,105,0.55); border:1px solid rgba(248,199,105,0.2); background:rgba(248,199,105,0.05); }
+.detail-badge.forecast    { color:rgba(205,112,151,0.55); border:1px solid rgba(205,112,151,0.2); background:rgba(205,112,151,0.05); }
+
+/* WAVEFORM LEGEND */
+.wave-legend {
+  display:flex; align-items:center; gap:14px; padding:7px 20px 0; flex-shrink:0;
+}
+.wl-item { display:flex; align-items:center; gap:5px; font-size:8px; font-weight:300; letter-spacing:0.1em; text-transform:uppercase; }
+.wl-item.actual  { color:rgba(206,168,154,0.4); }
+.wl-item.forecast { color:rgba(205,112,151,0.45); }
+.wl-item.inactive { opacity:0.2; }
+.wl-line-solid { width:16px; height:2px; background:rgba(248,199,105,0.5); border-radius:1px; }
+.wl-line-dash  { width:16px; height:0; border-top:2px dashed rgba(205,112,151,0.55); }
+
+/* MINI WAVEFORM */
+.mini-wave { padding:4px 20px 0; flex-shrink:0; }
+.mini-wave svg { width:100%; height:auto; display:block; overflow:visible; }
+
+/* DRIVER TAGS */
+.drivers-row { display:flex; flex-wrap:wrap; gap:5px; padding:7px 20px 0; flex-shrink:0; }
+.driver-tag {
+  font-size:9px; font-weight:300; letter-spacing:0.06em;
+  color:rgba(206,168,154,0.45); background:rgba(95,64,69,0.12);
+  border:1px solid rgba(95,64,69,0.2); border-radius:12px; padding:3px 8px;
+}
+
+/* EVENTS */
+.detail-events { padding:6px 20px 0; flex:1; overflow:hidden; }
+.events-section-label {
+  font-size:8px; letter-spacing:0.14em; text-transform:uppercase;
+  color:rgba(206,168,154,0.25); margin-bottom:4px;
+}
+.detail-event {
+  display:flex; align-items:center; gap:10px; padding:5px 0;
+  border-bottom:1px solid rgba(95,64,69,0.12);
+}
+.detail-event:last-child { border-bottom:none; }
+.de-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.de-dot.dim      { background:rgba(95,64,69,0.5); }
+.de-dot.med      { background:rgba(205,112,151,0.7); box-shadow:0 0 5px rgba(205,112,151,0.4); }
+.de-dot.high     { background:#F8C769; box-shadow:0 0 7px rgba(248,199,105,0.6); }
+.de-dot.upcoming { background:transparent; border:1px dashed rgba(205,112,151,0.5); }
+.de-info { flex:1; min-width:0; }
+.de-time { font-size:9px; font-weight:300; color:rgba(206,168,154,0.3); letter-spacing:0.08em; }
+.de-name { font-size:12px; font-weight:400; color:rgba(206,168,154,0.72); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.de-name.muted   { color:rgba(206,168,154,0.45); }
+.de-tag { font-family:'Cormorant Garamond',serif; font-size:10px; font-style:italic; color:rgba(206,168,154,0.3); white-space:nowrap; }
+.de-tag.glow     { color:rgba(248,199,105,0.55); text-shadow:0 0 8px rgba(248,199,105,0.25); }
+.de-tag.forecast { color:rgba(205,112,151,0.4); }
+
+/* SUGGESTIONS */
+.suggestions-section { padding:6px 20px 0; flex-shrink:0; }
+.sug-label { font-size:8px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(205,112,151,0.4); margin-bottom:5px; }
+.sug-row { display:flex; align-items:flex-start; gap:8px; padding:4px 0; border-bottom:1px solid rgba(95,64,69,0.1); }
+.sug-row:last-child { border-bottom:none; }
+.sug-bullet { width:4px; height:4px; border-radius:50%; background:rgba(205,112,151,0.4); margin-top:6px; flex-shrink:0; }
+.sug-text { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; font-weight:300; color:rgba(206,168,154,0.6); line-height:1.35; }
+
+/* ACTIONS */
+.detail-actions { padding:8px 20px 12px; display:flex; gap:10px; flex-shrink:0; }
+.btn-secondary {
+  flex:1; padding:9px 0; text-align:center; border-radius:10px; cursor:pointer;
+  font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase;
+  background:rgba(95,64,69,0.2); border:1px solid rgba(95,64,69,0.35);
+  color:rgba(206,168,154,0.55);
+}
+.btn-primary {
+  flex:1; padding:9px 0; text-align:center; border-radius:10px; cursor:pointer;
+  font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase;
+  background:rgba(248,199,105,0.08); border:1px solid rgba(248,199,105,0.2);
+  color:rgba(248,199,105,0.6); text-shadow:0 0 10px rgba(248,199,105,0.2);
+}
+.btn-primary.future {
+  background:rgba(205,112,151,0.08); border-color:rgba(205,112,151,0.2);
+  color:rgba(205,112,151,0.6); text-shadow:0 0 10px rgba(205,112,151,0.2);
+}
+
+/* BOTTOM NAV */
+.bottom-nav { flex-shrink:0; position:relative; z-index:10; }
+.nav-bar {
+  display:flex; justify-content:space-around; align-items:center;
+  padding:14px 32px 28px; background:rgba(10,4,8,0.92);
+  border-top:1px solid rgba(95,64,69,0.18); backdrop-filter:blur(20px);
+}
+.nav-item { display:flex; flex-direction:column; align-items:center; gap:5px; opacity:0.4; cursor:pointer; text-decoration:none; }
+.nav-item.active { opacity:1; }
+.nav-item.active .nav-label { color:var(--sun); text-shadow:0 0 10px rgba(248,199,105,0.4); }
+.nav-item.active svg { filter:drop-shadow(0 0 6px rgba(248,199,105,0.5)); }
+.nav-label { font-size:9px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:rgba(206,168,154,0.7); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <rect x="0" y="4" width="3" height="8" rx="1" fill="#CEA89A"/>
+        <rect x="4.5" y="2.5" width="3" height="9.5" rx="1" fill="#CEA89A"/>
+        <rect x="9" y="0.5" width="3" height="11.5" rx="1" fill="#CEA89A"/>
+        <rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="rgba(206,168,154,0.3)"/>
+      </svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="rgba(206,168,154,0.4)" stroke-width="1"/>
+        <rect x="2" y="2" width="15" height="8" rx="2" fill="rgba(206,168,154,0.5)"/>
+        <path d="M23 4.5V7.5C23.8 7.2 24.5 6.5 24.5 6C24.5 5.5 23.8 4.8 23 4.5Z" fill="rgba(206,168,154,0.4)"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="garden-header">
+    <div class="week-range">Mar 2 – Mar 10, 2026</div>
+    <h1 class="garden-title">your garden</h1>
+    <div class="garden-sub">seven days, growing in the dark</div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot flower"></div>social</div>
+    <div class="legend-item"><div class="legend-dot mushroom"></div>focused</div>
+    <div class="legend-item"><div class="legend-dot cluster"></div>scattered</div>
+  </div>
+
+  <!-- PLANT BED -->
+  <div class="plant-bed-outer">
+    <div class="plant-bed" id="garden-scroll">
+
+      <!-- Mar 2 · CLUSTER · DIM -->
+      <div class="day-card" data-dayid="mar2">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <defs><radialGradient id="cg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#5F4045" stop-opacity="0.6"/><stop offset="100%" stop-color="#3A1E22" stop-opacity="0.2"/></radialGradient></defs>
+          <ellipse cx="26" cy="94" rx="13" ry="7" fill="url(#cg1)" opacity="0.45"/>
+          <ellipse cx="44" cy="92" rx="11" ry="6" fill="url(#cg1)" opacity="0.38"/>
+          <ellipse cx="35" cy="88" rx="9" ry="5.5" fill="url(#cg1)" opacity="0.35"/>
+          <ellipse cx="52" cy="95" rx="7" ry="4" fill="url(#cg1)" opacity="0.3"/>
+          <ellipse cx="37" cy="91" rx="18" ry="9" fill="rgba(95,64,69,0.04)"/>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Mon</span><span class="day-date">Mar 2</span><span class="day-density">dim</span>
+        </div>
+      </div>
+
+      <!-- Mar 3 · MUSHROOM · MEDIUM -->
+      <div class="day-card" data-dayid="mar3">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <defs>
+            <radialGradient id="mg3" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#CEA89A" stop-opacity="0.75"/><stop offset="60%" stop-color="#A95E5C" stop-opacity="0.65"/><stop offset="100%" stop-color="#5F4045" stop-opacity="0.2"/></radialGradient>
+            <filter id="mf3" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect x="31" y="60" width="14" height="38" rx="5" fill="rgba(169,94,92,0.55)" opacity="0.7"/>
+          <path d="M10,62 C10,35 38,25 38,25 C38,25 66,35 66,62 Z" fill="url(#mg3)" filter="url(#mf3)"/>
+          <ellipse cx="38" cy="62" rx="28" ry="5" fill="rgba(10,4,8,0.5)"/>
+          <circle cx="27" cy="45" r="4" fill="rgba(206,168,154,0.25)"/>
+          <circle cx="46" cy="38" r="3" fill="rgba(206,168,154,0.2)"/>
+          <circle cx="38" cy="52" r="2.5" fill="rgba(206,168,154,0.18)"/>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Tue</span><span class="day-date">Mar 3</span><span class="day-density">present</span>
+        </div>
+      </div>
+
+      <!-- Mar 4 · FLOWER · HIGH -->
+      <div class="day-card" data-dayid="mar4">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <defs>
+            <radialGradient id="pg4" cx="50%" cy="90%" r="60%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#F8C769" stop-opacity="0.95"/><stop offset="45%" stop-color="#F67840" stop-opacity="0.75"/><stop offset="100%" stop-color="#CD7097" stop-opacity="0.2"/></radialGradient>
+            <radialGradient id="cng4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F8C769"/><stop offset="100%" stop-color="#F67840"/></radialGradient>
+            <filter id="ff4" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4" result="b1"/><feGaussianBlur stdDeviation="9" result="b2"/><feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path d="M38 98 C37 85 36 72 38 62" stroke="rgba(169,94,92,0.5)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M38 82 C32 76 22 73 20 68 C26 71 36 77 38 82Z" fill="rgba(169,94,92,0.3)" opacity="0.7"/>
+          <g filter="url(#ff4)">
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="url(#pg4)" transform="rotate(0 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="url(#pg4)" opacity="0.9" transform="rotate(60 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="url(#pg4)" transform="rotate(120 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="url(#pg4)" opacity="0.9" transform="rotate(180 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="url(#pg4)" transform="rotate(240 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="url(#pg4)" opacity="0.9" transform="rotate(300 38 62)"/>
+          </g>
+          <circle cx="38" cy="62" r="9" fill="url(#cng4)"/>
+          <circle cx="38" cy="62" r="5" fill="#F8C769"/>
+          <circle cx="38" cy="62" r="2.5" fill="rgba(255,255,255,0.65)"/>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Wed</span><span class="day-date">Mar 4</span><span class="day-density">vivid</span>
+        </div>
+      </div>
+
+      <!-- Mar 5 · FLOWER · PEAK -->
+      <div class="day-card" data-dayid="mar5">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <defs>
+            <radialGradient id="pg5" cx="50%" cy="90%" r="60%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/><stop offset="20%" stop-color="#FFF0C0" stop-opacity="1"/><stop offset="55%" stop-color="#F8C769" stop-opacity="0.95"/><stop offset="100%" stop-color="#CD7097" stop-opacity="0.25"/></radialGradient>
+            <radialGradient id="cng5" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="40%" stop-color="#F8C769"/><stop offset="100%" stop-color="#F67840"/></radialGradient>
+            <filter id="ff5" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="6" result="b1"/><feGaussianBlur stdDeviation="14" result="b2"/><feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path d="M38 98 C37 82 36 65 38 52" stroke="rgba(169,94,92,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M38 78 C31 71 20 68 18 62 C25 66 36 72 38 78Z" fill="rgba(169,94,92,0.35)" opacity="0.7"/>
+          <g filter="url(#ff5)">
+            <ellipse cx="38" cy="27" rx="10" ry="25" fill="url(#pg5)" transform="rotate(0 38 52)"/>
+            <ellipse cx="38" cy="27" rx="10" ry="25" fill="url(#pg5)" opacity="0.9" transform="rotate(60 38 52)"/>
+            <ellipse cx="38" cy="27" rx="10" ry="25" fill="url(#pg5)" transform="rotate(120 38 52)"/>
+            <ellipse cx="38" cy="27" rx="10" ry="25" fill="url(#pg5)" opacity="0.9" transform="rotate(180 38 52)"/>
+            <ellipse cx="38" cy="27" rx="10" ry="25" fill="url(#pg5)" transform="rotate(240 38 52)"/>
+            <ellipse cx="38" cy="27" rx="10" ry="25" fill="url(#pg5)" opacity="0.9" transform="rotate(300 38 52)"/>
+          </g>
+          <circle cx="38" cy="52" r="12" fill="url(#cng5)" filter="url(#ff5)"/>
+          <circle cx="38" cy="52" r="7" fill="#FFF8E0"/>
+          <circle cx="38" cy="52" r="3" fill="rgba(255,255,255,0.95)"/>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Thu</span><span class="day-date">Mar 5</span><span class="day-density">luminous</span>
+        </div>
+      </div>
+
+      <!-- Mar 6 · CLUSTER · LOW -->
+      <div class="day-card" data-dayid="mar6">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <defs><radialGradient id="cg6" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#A95E5C" stop-opacity="0.55"/><stop offset="100%" stop-color="#5F4045" stop-opacity="0.2"/></radialGradient></defs>
+          <ellipse cx="24" cy="92" rx="14" ry="8" fill="url(#cg6)" opacity="0.52"/>
+          <ellipse cx="46" cy="90" rx="12" ry="7" fill="url(#cg6)" opacity="0.45"/>
+          <ellipse cx="35" cy="85" rx="10" ry="6" fill="url(#cg6)" opacity="0.42"/>
+          <ellipse cx="54" cy="94" rx="8" ry="5" fill="url(#cg6)" opacity="0.38"/>
+          <ellipse cx="38" cy="78" rx="6" ry="4.5" fill="url(#cg6)" opacity="0.3"/>
+          <ellipse cx="38" cy="89" rx="20" ry="10" fill="rgba(169,94,92,0.05)"/>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Fri</span><span class="day-date">Mar 6</span><span class="day-density">fading</span>
+        </div>
+      </div>
+
+      <!-- Mar 7 · FLOWER · HIGH -->
+      <div class="day-card" data-dayid="mar7">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <defs>
+            <radialGradient id="pg7" cx="50%" cy="90%" r="60%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#F8C769" stop-opacity="0.9"/><stop offset="45%" stop-color="#F67840" stop-opacity="0.7"/><stop offset="100%" stop-color="#CD7097" stop-opacity="0.2"/></radialGradient>
+            <radialGradient id="cng7" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F8C769"/><stop offset="100%" stop-color="#F67840"/></radialGradient>
+            <filter id="ff7" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4.5" result="b1"/><feGaussianBlur stdDeviation="10" result="b2"/><feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path d="M38 98 C37 84 36 70 38 60" stroke="rgba(169,94,92,0.5)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M38 80 C33 74 23 71 21 66 C27 69 37 75 38 80Z" fill="rgba(169,94,92,0.3)" opacity="0.7"/>
+          <g filter="url(#ff7)">
+            <ellipse cx="38" cy="40" rx="8.5" ry="21" fill="url(#pg7)" transform="rotate(0 38 60)"/>
+            <ellipse cx="38" cy="40" rx="8.5" ry="21" fill="url(#pg7)" opacity="0.9" transform="rotate(60 38 60)"/>
+            <ellipse cx="38" cy="40" rx="8.5" ry="21" fill="url(#pg7)" transform="rotate(120 38 60)"/>
+            <ellipse cx="38" cy="40" rx="8.5" ry="21" fill="url(#pg7)" opacity="0.9" transform="rotate(180 38 60)"/>
+            <ellipse cx="38" cy="40" rx="8.5" ry="21" fill="url(#pg7)" transform="rotate(240 38 60)"/>
+            <ellipse cx="38" cy="40" rx="8.5" ry="21" fill="url(#pg7)" opacity="0.9" transform="rotate(300 38 60)"/>
+          </g>
+          <circle cx="38" cy="60" r="9" fill="url(#cng7)"/>
+          <circle cx="38" cy="60" r="5" fill="#F8C769"/>
+          <circle cx="38" cy="60" r="2.5" fill="rgba(255,255,255,0.65)"/>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Sat</span><span class="day-date">Mar 7</span><span class="day-density">vivid</span>
+        </div>
+      </div>
+
+      <!-- TODAY Mar 8 · FLOWER · BLOOMING -->
+      <div class="day-card today-card" data-dayid="mar8" id="today-card">
+        <div class="today-ring"></div>
+        <svg width="96" height="110" viewBox="0 0 96 110" overflow="visible" class="today-plant">
+          <defs>
+            <radialGradient id="pg8" cx="50%" cy="90%" r="65%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#FFF0C0" stop-opacity="1"/><stop offset="30%" stop-color="#F8C769" stop-opacity="0.95"/><stop offset="65%" stop-color="#F67840" stop-opacity="0.7"/><stop offset="100%" stop-color="#CD7097" stop-opacity="0.22"/></radialGradient>
+            <radialGradient id="cng8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFF8E0"/><stop offset="50%" stop-color="#F8C769"/><stop offset="100%" stop-color="#F67840"/></radialGradient>
+            <radialGradient id="halo8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F8C769" stop-opacity="0.12"/><stop offset="100%" stop-color="#F67840" stop-opacity="0"/></radialGradient>
+            <filter id="ff8" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="5" result="b1"/><feGaussianBlur stdDeviation="12" result="b2"/><feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <ellipse cx="48" cy="62" rx="42" ry="42" fill="url(#halo8)" opacity="0.7"/>
+          <path d="M48 108 C47 92 46 78 48 66" stroke="rgba(169,94,92,0.6)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          <path d="M48 88 C41 81 29 78 27 72 C34 76 46 82 48 88Z" fill="rgba(169,94,92,0.35)" opacity="0.75"/>
+          <path d="M48 80 C55 73 67 70 69 64 C62 68 50 74 48 80Z" fill="rgba(169,94,92,0.3)" opacity="0.7"/>
+          <g class="today-petals" filter="url(#ff8)">
+            <ellipse cx="48" cy="41" rx="10" ry="23" fill="url(#pg8)" transform="rotate(0 48 64)"/>
+            <ellipse cx="48" cy="41" rx="10" ry="23" fill="url(#pg8)" opacity="0.92" transform="rotate(60 48 64)"/>
+            <ellipse cx="48" cy="41" rx="10" ry="23" fill="url(#pg8)" transform="rotate(120 48 64)"/>
+            <ellipse cx="48" cy="41" rx="10" ry="23" fill="url(#pg8)" opacity="0.92" transform="rotate(180 48 64)"/>
+            <ellipse cx="48" cy="41" rx="10" ry="23" fill="url(#pg8)" transform="rotate(240 48 64)"/>
+            <ellipse cx="48" cy="41" rx="10" ry="23" fill="url(#pg8)" opacity="0.92" transform="rotate(300 48 64)"/>
+          </g>
+          <circle cx="48" cy="64" r="11" fill="url(#cng8)" filter="url(#ff8)"/>
+          <circle cx="48" cy="64" r="7" fill="#FFF8E0"/>
+          <circle cx="48" cy="64" r="3" fill="rgba(255,255,255,0.9)"/>
+          <circle cx="48" cy="16" r="3" fill="#F8C769" opacity="0.7">
+            <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="48" cy="16" r="7" fill="rgba(248,199,105,0.15)">
+            <animate attributeName="r" values="7;10;7" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Today</span><span class="day-date">Mar 8</span><span class="day-density">blooming</span>
+        </div>
+      </div>
+
+      <!-- Mar 9 · FLOWER · FUTURE -->
+      <div class="day-card" data-dayid="mar9">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <path d="M38 98 C37 84 36 70 38 62" stroke="rgba(169,94,92,0.25)" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <g opacity="0.22">
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="none" stroke="rgba(248,199,105,0.5)" stroke-width="0.8" stroke-dasharray="3 3" transform="rotate(0 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="none" stroke="rgba(248,199,105,0.5)" stroke-width="0.8" stroke-dasharray="3 3" transform="rotate(60 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="none" stroke="rgba(248,199,105,0.5)" stroke-width="0.8" stroke-dasharray="3 3" transform="rotate(120 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="none" stroke="rgba(248,199,105,0.5)" stroke-width="0.8" stroke-dasharray="3 3" transform="rotate(180 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="none" stroke="rgba(248,199,105,0.5)" stroke-width="0.8" stroke-dasharray="3 3" transform="rotate(240 38 62)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="20" fill="none" stroke="rgba(248,199,105,0.5)" stroke-width="0.8" stroke-dasharray="3 3" transform="rotate(300 38 62)"/>
+          </g>
+          <circle cx="38" cy="62" r="8" fill="none" stroke="rgba(248,199,105,0.3)" stroke-width="0.8" opacity="0.3"/>
+          <text x="38" y="22" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(206,168,154,0.3)" letter-spacing="1">plan</text>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Mon</span><span class="day-date">Mar 9</span><span class="day-density">planned</span>
+        </div>
+      </div>
+
+      <!-- Mar 10 · MUSHROOM · FUTURE -->
+      <div class="day-card" data-dayid="mar10">
+        <svg width="76" height="100" viewBox="0 0 76 100" overflow="visible">
+          <rect x="31" y="65" width="14" height="33" rx="5" fill="none" stroke="rgba(169,94,92,0.22)" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+          <path d="M10,65 C10,38 38,28 38,28 C38,28 66,38 66,65 Z" fill="none" stroke="rgba(206,168,154,0.22)" stroke-width="0.9" stroke-dasharray="4 4" opacity="0.4"/>
+          <text x="38" y="18" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(206,168,154,0.3)" letter-spacing="1">open</text>
+        </svg>
+        <div class="day-labels">
+          <span class="day-dow">Tue</span><span class="day-date">Mar 10</span><span class="day-density">open</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ground-line"></div>
+
+  <!-- DETAIL PANEL (JS-rendered) -->
+  <div class="detail-panel" id="detail-panel"></div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-bar">
+      <a href="index.html" class="nav-item">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5L11 3l8 6.5V19a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="rgba(206,168,154,0.6)" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 20v-7h6v7" stroke="rgba(206,168,154,0.6)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="garden.html" class="nav-item active">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 18V10" stroke="#F8C769" stroke-width="1.2" stroke-linecap="round"/><path d="M11 14c0 0-4-3-4-7 0 0 2 1 4 4 2-3 4-4 4-4 0 4-4 7-4 7z" stroke="#F8C769" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 18h12" stroke="#F8C769" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span class="nav-label">Garden</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="rgba(206,168,154,0.6)" stroke-width="1.2"/><path d="M7 11h8M7 7.5h5M7 14.5h6" stroke="rgba(206,168,154,0.6)" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span class="nav-label">Plan</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+window.onerror = function(msg, src, line) { console.error('JS error:', msg, 'line', line); };
+
+// 16 density values per day: hours 6a–9p (0–10 scale)
+// nowIndex = first bar that is "forecast" (16=all actual, 0=all forecast)
+const DAYS = {
+  mar2: {
+    type:'past', label:'dim', labelClass:'muted',
+    fullDow:'Monday', fullDate:'March 2',
+    densities:[1,1,2,2,2,2,2,1,1,2,2,1,1,1,1,1], nowIndex:16,
+    events:[
+      {time:'9:00 AM', name:'Work emails',      dot:'dim', tag:'dim',    glow:false, status:'past'},
+      {time:'12:00 PM',name:'Lunch at desk',    dot:'dim', tag:'dim',    glow:false, status:'past'},
+      {time:'5:30 PM', name:'Commute home',     dot:'dim', tag:'fading', glow:false, status:'past'},
+    ],
+    drivers:['routine tasks','minimal novelty','low social contact'],
+    actions:['✦ Tend','Write a memory'],
+  },
+  mar3: {
+    type:'past', label:'present', labelClass:'muted',
+    fullDow:'Tuesday', fullDate:'March 3',
+    densities:[1,2,3,4,6,5,4,3,2,4,5,4,3,2,2,1], nowIndex:16,
+    events:[
+      {time:'9:00 AM', name:'3hr focus block',     dot:'med', tag:'focused', glow:false, status:'past'},
+      {time:'12:30 PM',name:'Lunch outside',       dot:'med', tag:'present', glow:false, status:'past'},
+      {time:'8:00 PM', name:'Reading session',     dot:'med', tag:'present', glow:false, status:'past'},
+    ],
+    drivers:['focused attention','creative flow','mindful breaks'],
+    actions:['✦ Tend','Write a memory'],
+  },
+  mar4: {
+    type:'past', label:'vivid', labelClass:'warm',
+    fullDow:'Wednesday', fullDate:'March 4',
+    densities:[2,2,3,5,7,6,5,3,2,2,3,4,5,4,3,1], nowIndex:16,
+    events:[
+      {time:'10:00 AM',name:'Pottery class',          dot:'high',tag:'vivid',   glow:true,  status:'past'},
+      {time:'1:00 PM', name:'Lunch with Jamie',       dot:'med', tag:'present', glow:false, status:'past'},
+      {time:'5:00 PM', name:'Walk — new route',       dot:'med', tag:'present', glow:false, status:'past'},
+    ],
+    drivers:['novelty (new skill)','meaningful social','movement + new env'],
+    actions:['✦ Tend','Write a memory'],
+  },
+  mar5: {
+    type:'past', label:'luminous', labelClass:'warm',
+    fullDow:'Thursday', fullDate:'March 5',
+    densities:[2,3,5,6,9,8,5,3,2,2,4,5,8,7,4,2], nowIndex:16,
+    events:[
+      {time:'9:30 AM', name:'Hike at Fiery Gizzard',      dot:'high',tag:'luminous',glow:true,  status:'past'},
+      {time:'2:00 PM', name:'Creative breakthrough',      dot:'high',tag:'vivid',   glow:true,  status:'past'},
+      {time:'7:00 PM', name:'Live music + late dinner',   dot:'high',tag:'luminous',glow:true,  status:'past'},
+    ],
+    drivers:['novel environment','peak flow state','deep emotional connection'],
+    actions:['✦ Tend','Write a memory'],
+  },
+  mar6: {
+    type:'past', label:'fading', labelClass:'muted',
+    fullDow:'Friday', fullDate:'March 6',
+    densities:[1,1,2,2,2,3,2,1,1,1,2,2,2,1,1,1], nowIndex:16,
+    events:[
+      {time:'9:00 AM', name:'Admin + backlog',          dot:'dim', tag:'dim',    glow:false, status:'past'},
+      {time:'2:00 PM', name:'Back-to-back meetings',   dot:'dim', tag:'dim',    glow:false, status:'past'},
+      {time:'7:00 PM', name:'TV, too tired',           dot:'dim', tag:'fading', glow:false, status:'past'},
+    ],
+    drivers:['low energy recovery','passive rest','routine tasks'],
+    actions:['✦ Tend','Write a memory'],
+  },
+  mar7: {
+    type:'past', label:'vivid', labelClass:'warm',
+    fullDow:'Saturday', fullDate:'March 7',
+    densities:[2,3,4,4,5,5,5,6,3,2,3,5,7,6,4,2], nowIndex:16,
+    events:[
+      {time:'9:00 AM', name:"Farmer's market",        dot:'med', tag:'present',glow:false, status:'past'},
+      {time:'11:00 AM',name:'Long walk with Dana',    dot:'med', tag:'present',glow:false, status:'past'},
+      {time:'7:00 PM', name:'Dinner with the Nguyens',dot:'high',tag:'vivid',  glow:true,  status:'past'},
+    ],
+    drivers:['social connection','new place','meaningful conversation'],
+    actions:['✦ Tend','Write a memory'],
+  },
+  mar8: {
+    type:'today', label:'blooming', labelClass:'warm',
+    fullDow:'Sunday', fullDate:'March 8',
+    densities:[2,2,4,5,8,6,4,2,2,2,3,5,7,6,3,2],
+    nowIndex:5, // bars 0-4 (6a–10a) are actual; 5-15 are forecast
+    events:[
+      {time:'10:00 AM',name:'Ceramics class with Maya',  dot:'high',    tag:'vivid',           glow:true,  status:'past'},
+      {time:'12:30 PM',name:'Lunch at the market',      dot:'upcoming', tag:'forecast: present',glow:false, status:'upcoming'},
+      {time:'3:00 PM', name:'Emails + admin',           dot:'upcoming', tag:'forecast: dim',    glow:false, status:'upcoming'},
+      {time:'6:00 PM', name:'Dinner with the Nguyens',  dot:'upcoming', tag:'forecast: vivid',  glow:false, status:'upcoming'},
+    ],
+    drivers:['novelty (ceramics)','meaningful social','creative engagement'],
+    actions:['Tend','Reflect'],
+  },
+  mar9: {
+    type:'future', label:'planned', labelClass:'future',
+    fullDow:'Monday', fullDate:'March 9',
+    densities:[1,2,3,4,5,4,3,2,2,2,3,3,4,3,2,1], nowIndex:0,
+    events:[
+      {time:'9:00 AM', name:'Team standup',  dot:'upcoming',tag:'forecast',glow:false,status:'upcoming'},
+      {time:'11:00 AM',name:'Focus block',   dot:'upcoming',tag:'forecast',glow:false,status:'upcoming'},
+      {time:'12:00 PM',name:'Gym',           dot:'upcoming',tag:'forecast',glow:false,status:'upcoming'},
+    ],
+    suggestions:[
+      'Call a friend during your lunch break',
+      'Take an unfamiliar route to the gym',
+      "Cook something you've never made before",
+    ],
+    actions:['Add intention','Plan this day'],
+  },
+  mar10: {
+    type:'future', label:'open', labelClass:'future',
+    fullDow:'Tuesday', fullDate:'March 10',
+    densities:[1,1,2,3,3,3,3,2,2,4,5,4,3,2,2,1], nowIndex:0,
+    events:[
+      {time:'2:00 PM',name:'Deep work block',dot:'upcoming',tag:'forecast',glow:false,status:'upcoming'},
+    ],
+    suggestions:[
+      'Walk to a new café for morning coffee',
+      'Schedule a catch-up call with someone you miss',
+      'Spend 20 min on a creative side project',
+    ],
+    actions:['Add intention','Plan this day'],
+  },
+};
+
+// ── WAVEFORM RENDERER ────────────────────────────────────────────────────────
+function buildWaveform(densities, nowIndex) {
+  var W=13, SLOT=18.5, X0=5, BASE=42, MAXH=38;
+  var bars = '';
+
+  densities.forEach(function(d, i) {
+    if (!d) return;
+    var x = (X0 + i * SLOT).toFixed(1);
+    var h = Math.max(3, Math.round(d / 10 * MAXH));
+    var y = BASE - h;
+    var predicted = (nowIndex === 0) || (i >= nowIndex);
+
+    if (predicted) {
+      var so = Math.max(0.22, d / 10 * 0.6).toFixed(2);
+      var fo = (d / 10 * 0.08).toFixed(2);
+      bars += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + h + '" rx="2"'
+            + ' fill="rgba(205,112,151,' + fo + ')"'
+            + ' stroke="rgba(205,112,151,' + so + ')"'
+            + ' stroke-width="1.2" stroke-dasharray="2.5 2.5"/>';
+    } else {
+      if (d >= 8) {
+        bars += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + h + '" rx="2" fill="url(#wfhigh)" filter="url(#wfglow)"/>';
+      } else if (d >= 5) {
+        bars += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + h + '" rx="2" fill="url(#wfmed)"/>';
+      } else if (d >= 3) {
+        bars += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + h + '" rx="2" fill="rgba(95,64,69,0.65)"/>';
+      } else {
+        bars += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + h + '" rx="2" fill="rgba(58,30,34,0.5)" opacity="0.45"/>';
+      }
+    }
+  });
+
+  // NOW cursor between last actual and first forecast bar
+  var nowLine = '';
+  if (nowIndex > 0 && nowIndex < densities.length) {
+    var lx = X0 + (nowIndex - 1) * SLOT + W;
+    var rx = X0 + nowIndex * SLOT;
+    var cx = ((lx + rx) / 2).toFixed(1);
+    var tx = (parseFloat(cx) + 4).toFixed(1);
+    nowLine = '<line x1="' + cx + '" y1="1" x2="' + cx + '" y2="' + BASE + '" stroke="rgba(248,199,105,0.3)" stroke-width="0.75" stroke-dasharray="3 4"/>'
+            + '<circle cx="' + cx + '" cy="1.5" r="2" fill="rgba(248,199,105,0.7)"/>'
+            + '<text x="' + tx + '" y="9" font-family="DM Sans,sans-serif" font-size="6.5" fill="rgba(205,112,151,0.5)" letter-spacing="0.5">forecast</text>';
+  }
+
+  var defs = '<defs>'
+    + '<filter id="wfglow" x="-60%" y="-60%" width="220%" height="220%">'
+    + '<feGaussianBlur stdDeviation="3" result="b1"/>'
+    + '<feGaussianBlur stdDeviation="7" result="b2"/>'
+    + '<feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>'
+    + '</filter>'
+    + '<linearGradient id="wfmed" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0%" stop-color="#CD7097" stop-opacity="0.85"/>'
+    + '<stop offset="100%" stop-color="#A95E5C" stop-opacity="0.1"/>'
+    + '</linearGradient>'
+    + '<linearGradient id="wfhigh" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0%" stop-color="#F8C769" stop-opacity="1"/>'
+    + '<stop offset="100%" stop-color="#F67840" stop-opacity="0.2"/>'
+    + '</linearGradient>'
+    + '</defs>';
+
+  return '<svg viewBox="0 0 310 44" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;width:100%;height:auto;display:block;">'
+       + defs
+       + '<line x1="0" y1="' + BASE + '" x2="310" y2="' + BASE + '" stroke="rgba(95,64,69,0.15)" stroke-width="0.5"/>'
+       + bars + nowLine
+       + '</svg>';
+}
+
+// ── PANEL LEGEND ─────────────────────────────────────────────────────────────
+function buildLegend(type) {
+  const hasActual   = type !== 'future';
+  const hasForecast = type !== 'past';
+  return `<div class="wave-legend">
+    <div class="wl-item actual ${hasActual ? '' : 'inactive'}">
+      <div class="wl-line-solid"></div>actual
+    </div>
+    <div class="wl-item forecast ${hasForecast ? '' : 'inactive'}">
+      <div class="wl-line-dash"></div>forecast
+    </div>
+  </div>`;
+}
+
+// ── EVENT ROW ────────────────────────────────────────────────────────────────
+function buildEventRow(e) {
+  const nameClass = e.status === 'upcoming' ? 'muted' : '';
+  const tagClass  = e.glow ? 'glow' : e.status === 'upcoming' ? 'forecast' : '';
+  return `<div class="detail-event">
+    <div class="de-dot ${e.dot}"></div>
+    <div class="de-info">
+      <div class="de-time">${e.time}</div>
+      <div class="de-name ${nameClass}">${e.name}</div>
+    </div>
+    <span class="de-tag ${tagClass}">${e.tag}</span>
+  </div>`;
+}
+
+// ── PANEL BUILDERS ───────────────────────────────────────────────────────────
+function buildPastPanel(d) {
+  const events   = d.events.map(buildEventRow).join('');
+  const drivers  = d.drivers.map(t => `<span class="driver-tag">${t}</span>`).join('');
+  return `<div class="detail-handle"></div>
+  <div class="detail-header">
+    <span class="detail-day-name">${d.fullDow.toLowerCase()}, ${d.fullDate.toLowerCase()}</span>
+    <div class="detail-header-right">
+      <span class="detail-label ${d.labelClass}">${d.label}</span>
+    </div>
+  </div>
+  ${buildLegend('past')}
+  <div class="mini-wave">${buildWaveform(d.densities, d.nowIndex)}</div>
+  <div class="drivers-row">${drivers}</div>
+  <div class="detail-events">${events}</div>
+  <div class="detail-actions">
+    <div class="btn-secondary">${d.actions[0]}</div>
+    <div class="btn-primary">${d.actions[1]}</div>
+  </div>`;
+}
+
+function buildTodayPanel(d) {
+  const pastEvents     = d.events.filter(e => e.status === 'past');
+  const upcomingEvents = d.events.filter(e => e.status === 'upcoming');
+  const pastRows    = pastEvents.map(buildEventRow).join('');
+  const upcomingRows= upcomingEvents.map(buildEventRow).join('');
+  const drivers     = d.drivers.map(t => `<span class="driver-tag">${t}</span>`).join('');
+  return `<div class="detail-handle"></div>
+  <div class="detail-header">
+    <span class="detail-day-name">sunday, march 8</span>
+    <div class="detail-header-right">
+      <span class="detail-badge in-progress">in progress</span>
+      <span class="detail-label ${d.labelClass}">${d.label}</span>
+    </div>
+  </div>
+  ${buildLegend('today')}
+  <div class="mini-wave">${buildWaveform(d.densities, d.nowIndex)}</div>
+  <div class="drivers-row">${drivers}</div>
+  <div class="detail-events">
+    ${pastRows.length ? `<div class="events-section-label">happened</div>${pastRows}` : ''}
+    ${upcomingRows.length ? `<div class="events-section-label" style="margin-top:4px">upcoming</div>${upcomingRows}` : ''}
+  </div>
+  <div class="detail-actions">
+    <div class="btn-secondary">${d.actions[0]}</div>
+    <div class="btn-primary">${d.actions[1]}</div>
+  </div>`;
+}
+
+function buildFuturePanel(d) {
+  const events = d.events.map(buildEventRow).join('');
+  const sugs   = (d.suggestions || []).map(s =>
+    `<div class="sug-row"><div class="sug-bullet"></div><span class="sug-text">${s}</span></div>`
+  ).join('');
+  return `<div class="detail-handle"></div>
+  <div class="detail-header">
+    <span class="detail-day-name">${d.fullDow.toLowerCase()}, ${d.fullDate.toLowerCase()}</span>
+    <div class="detail-header-right">
+      <span class="detail-badge forecast">forecast</span>
+      <span class="detail-label ${d.labelClass}">${d.label}</span>
+    </div>
+  </div>
+  ${buildLegend('future')}
+  <div class="mini-wave">${buildWaveform(d.densities, d.nowIndex)}</div>
+  <div class="detail-events">
+    <div class="events-section-label">planned</div>
+    ${events}
+  </div>
+  <div class="suggestions-section">
+    <div class="sug-label">to make this day memorable</div>
+    ${sugs}
+  </div>
+  <div class="detail-actions">
+    <div class="btn-secondary">${d.actions[0]}</div>
+    <div class="btn-primary future">${d.actions[1]}</div>
+  </div>`;
+}
+
+// ── SELECT DAY ───────────────────────────────────────────────────────────────
+function selectDay(dayId) {
+  // Update card highlight
+  document.querySelectorAll('.day-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.dayid === dayId);
+  });
+
+  const d = DAYS[dayId];
+  const panel = document.getElementById('detail-panel');
+
+  // Border tint
+  panel.classList.toggle('future-panel', d.type === 'future');
+
+  // Render content
+  if (d.type === 'past')   panel.innerHTML = buildPastPanel(d);
+  if (d.type === 'today')  panel.innerHTML = buildTodayPanel(d);
+  if (d.type === 'future') panel.innerHTML = buildFuturePanel(d);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.day-card').forEach(function(card) {
+    card.addEventListener('click', function() { selectDay(card.dataset.dayid); });
+  });
+
+  var bed = document.getElementById('garden-scroll');
+  var todayCard = document.getElementById('today-card');
+  if (bed && todayCard) {
+    bed.scrollLeft = todayCard.offsetLeft + todayCard.offsetWidth / 2 - bed.offsetWidth / 2;
+  }
+
+  selectDay('mar8');
+});
+</script>
+</body>
+</html>
